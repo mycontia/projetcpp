@@ -1,1 +1,19 @@
 readme
+Pour installer la bibliothèque sdl je crois qu'il faut faire ainsi : 
+
+brew install sdl2 pkg-config
+export PKG_CONFIG_PATH=$(brew --prefix sdl2)/lib/pkgconfig
+
+
+Plan du MVP0 : 
+Le MVP 0 : "Le Pixel de la Sphère"L'objectif est d'afficher une fenêtre avec un fond noir et un cercle plat (une sphère sans lumière) au centre, en utilisant uniquement des vecteurs.
+1. La brique essentielle (15 min) : La classe Vector3fNe commence pas par l'affichage. 
+Le Ray Tracing, c'est de la géométrie vectorielle. Crée un fichier Vector3f.hpp minimaliste :Attributs : float x, y, z.
+Méthodes : Addition, Soustraction, Produit scalaire (Dot product).C'est la base de tout. Sans elle, tu ne peux rien faire.
+2. Le cœur mathématique (20 min) : L'intersection Rayon/SphèreCrée une fonction (ou une classe Sphere) qui implémente l'équation d'intersection. 
+C'est l'unique moment complexe du projet.Un point $P$ est sur une sphère de centre $C$ et de rayon $r$ si :$$\|P - C\|^2 = r^2$$
+3. Le rendu minimal (25 min) : La double boucleAu lieu de gérer une caméra complexe, fais une projection orthogonale ultra-simple :
+Parcours chaque pixel $(x, y)$ de ta fenêtre.Crée un rayon partant de $(x, y, 0)$ et allant vers l'avant $(0, 0, 1)$.
+Si le rayon touche ta sphère : colorie le pixel en rouge dans la SDL.Sinon : colorie en noir.
+
+MVP0 : "Le cercle rouge" (10 étapes)Voici la marche à suivre pour obtenir un résultat visuel en moins d'une heure :Squelette SDL : Initialise SDL2, crée une fenêtre (SDL_CreateWindow) et un renderer (SDL_CreateRenderer). C'est ton canevas.Classe Vector3f : Crée une structure avec x, y, z. Ajoute une fonction pour le produit scalaire (dot product) : $a \cdot b = a.x \times b.x + a.y \times b.y + a.z \times b.z$.Classe Ray3f : Crée une classe simple qui contient deux Vector3f : une origine ($O$) et une direction ($D$).Définition de la Sphère : Crée une classe Sphere avec un centre ($C$) et un rayon ($r$).L'équation d'intersection : Implémente la fonction is_hit. Elle doit résoudre l'équation du second degré $at^2 + bt + c = 0$ où :$a = D \cdot D$$b = 2 \times (D \cdot (O - C))$$c = (O - C) \cdot (O - C) - r^2$Calcul du Discriminant : Dans is_hit, calcule $\Delta = b^2 - 4ac$. Si $\Delta \geq 0$, le rayon touche la sphère.La boucle de rendu : Dans ton main, crée deux boucles for imbriquées pour parcourir chaque pixel $x$ (de 0 à 800) et $y$ (de 0 à 600).Génération du rayon : Pour chaque pixel $(x, y)$, crée un rayon. Pour le MVP0, utilise une origine $(x, y, 0)$ et une direction fixe $(0, 0, 1)$ pour tirer "tout droit".Le test de couleur : Si sphere.is_hit(rayon) est vrai, utilise SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255) (rouge), sinon (0, 0, 0, 255) (noir).Affichage : Dessine le point avec SDL_RenderDrawPoint(renderer, x, y) et, après les boucles, appelle SDL_RenderPresent(renderer) pour voir le résultat.
