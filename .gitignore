@@ -1,0 +1,4 @@
+mon_app
+mon_app.dSYM
+*.o
+a.out

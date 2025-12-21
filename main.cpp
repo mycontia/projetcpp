@@ -22,7 +22,7 @@ int main(void) {
     // avant while 
 
     Material rouge(255, 0, 0, 0);
-    Sphere s(Vector3f(0.2, 0.3, 5), 0.01, rouge); 
+    Sphere s(Vector3f(0.2f, 0.3f, 5.0f), 0.5f, rouge); 
 
     bool running = true;
     while (running) {

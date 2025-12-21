@@ -1,7 +1,7 @@
 #ifndef RAYON_H
 #define RAYON_H
 #include <iostream>
-#include <vector>
+#include <cmath>
 
 class Vector3f {
     public :
@@ -18,7 +18,50 @@ class Vector3f {
             y_ = y;
             z_ = z;   
         }
+
+        Vector3f operator- (Vector3f v1) const {  // const car on ne veut pas modifier le vecteur; & ? vect3f n'est pas une grosse struct 
+            Vector3f v;
+            v.x_ =  x_ - v1.x_;  //ATENTION A L'ORDRE
+            v.y_ = y_ - v1.y_;
+            v.z_ =  z_ - v1.z_;
+            return v;
+        }
+
+
+        Vector3f operator* (float a) const {  // const car on ne veut pas modifier le vecteur; & ? vect3f n'est pas une grosse struct 
+            Vector3f v;
+            v.x_ = a * x_;
+            v.y_ = a * y_;
+            v.z_ = a * z_;
+            return v;
+        }
+
+        Vector3f operator* (Vector3f v1) const {  // const car on ne veut pas modifier le vecteur; & ? vect3f n'est pas une grosse struct 
+            Vector3f v;
+            v.x_ = v1.x_ * x_;  // multiplaction commutative 
+            v.y_ = v1.y_ * y_;
+            v.z_ = v1.z_ * z_;
+            return v;
+        }
+
+        Vector3f direction (Vector3f v) const{
+            Vector3f d;
+            d.x_ = v.x_ - x_;
+            d.y_ = v.y_ - y_;
+            d.z_ = v.z_ - z_;
+            return d;
+
+        }
+
+        float norm () const{  //normalisation 
+            float n;
+            n = pow(pow(x_,2) + pow(y_,2) + pow(z_,2), 1/2);
+            return n; 
+
+        }
 };
+
+float prod_scal (Vector3f v1, Vector3f v2);
 
 class Ray3f {
     public: 
@@ -156,5 +199,10 @@ class Scene {
         void render(int width, int height, std::string filename);
 
 };
+
+// class Grille {
+//     int width_;
+//     int height_; 
+// };
 
 #endif
