@@ -1,11 +1,5 @@
 #include "rayon.h"
 
-// int main (){
-
-// return 0; 
-
-// }
-
 // Simulation d'un plan en z = 0 (On dit que ça touche si le rayon descend)
 bool Quad::is_hit(Ray3f ray) {
     return ray.direction_.z_ < 0; 
