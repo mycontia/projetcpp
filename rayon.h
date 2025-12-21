@@ -1,0 +1,160 @@
+#ifndef RAYON_H
+#define RAYON_H
+#include <iostream>
+#include <vector>
+
+class Vector3f {
+    public :
+        float x_; 
+        float y_;
+        float z_; 
+        Vector3f() {
+            x_= 0; 
+            y_ = 0;
+            z_ = 0;
+        };
+        Vector3f(float x, float y, float z){
+            x_= x; 
+            y_ = y;
+            z_ = z;   
+        }
+};
+
+class Ray3f {
+    public: 
+        Vector3f origin_; 
+        Vector3f direction_;
+        Ray3f(){
+            origin_ = Vector3f();
+            direction_ = Vector3f();
+        }
+        Ray3f(Vector3f o, Vector3f d){
+            origin_ = o;
+            direction_ = d;
+        }
+};
+
+class Camera {
+    public: 
+        Vector3f position_; 
+        Vector3f direction_;
+        Camera(){
+            position_ = Vector3f();
+            direction_ = Vector3f();  
+        }
+
+        Camera(Vector3f p, Vector3f d){
+            position_ = p;
+            direction_ = d;
+        }
+
+};
+
+class Material {
+    public: 
+        float r_;
+        float g_;
+        float b_; 
+        float shininess_;
+
+        Material(){
+            r_ = 0;
+            g_ = 0;
+            b_ = 0;
+            shininess_ =0;
+        }
+        Material(float r, float g, float b, float s){
+            r_ = r;
+            g_ = g;
+            b_ = b;
+            shininess_ =s;
+        }
+
+};
+
+class Shape {
+    public: 
+        Material matter_; 
+
+        virtual bool is_hit(Ray3f ray) =0 ;  // & ? pas grosse struct 
+        virtual Ray3f reflect(Ray3f ray)=0;
+
+};
+
+
+class Cube : public Shape{
+    public: 
+        Vector3f origin_; 
+        Vector3f width_;
+        Vector3f height_;
+        Cube(){
+            origin_ = Vector3f();
+            width_= Vector3f();
+            height_ = Vector3f();
+            matter_ = Material();
+        }
+
+        Cube(Vector3f o, Vector3f w, Vector3f h, Material m){
+            origin_ = o;
+            width_= w;
+            height_ = h;
+            matter_ = m;
+        }
+        bool is_hit(Ray3f ray);
+        Ray3f reflect(Ray3f ray);
+
+};
+
+class Quad : public Shape{
+    public: 
+        Vector3f origin_; 
+        Vector3f width_;
+        Vector3f height_;
+        Quad(){
+            origin_ = Vector3f();
+            width_= Vector3f();
+            height_ = Vector3f();
+            matter_ = Material();
+        }
+
+        Quad(Vector3f o, Vector3f w, Vector3f h, Material m){
+            origin_ = o;
+            width_= w;
+            height_ = h;
+            matter_ = m;
+        }
+        bool is_hit(Ray3f ray);
+        Ray3f reflect(Ray3f ray);
+};
+
+class Sphere : public Shape{
+    public: 
+        Vector3f origin_; 
+        float radius_;
+        
+        Sphere(){
+            origin_ = Vector3f();
+            radius_= 0;
+            matter_ = Material();
+        }
+
+        Sphere(Vector3f o, float r, Material m){
+            origin_ = o;
+            radius_= r;
+            matter_ = m;
+        }
+        bool is_hit(Ray3f ray);
+        Ray3f reflect(Ray3f ray);
+};
+
+
+class Scene {
+    public: 
+        Camera camera_; 
+        std::vector<Shape*> shapes_;
+        Ray3f source_;
+        void render(int width, int height, std::string filename);
+
+};
+
+#endif
