@@ -7,9 +7,11 @@
 
 int main(void) {
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER);
-       
+    //taille de l'écran
+    int y_taille = 640;
+    int x_taille = 640;
 
-    SDL_Window* window = SDL_CreateWindow("Ray Tracing MVP0.1", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, 0);
+    SDL_Window* window = SDL_CreateWindow("Ray Tracing MVP0.1", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, x_taille, y_taille, 0);
     // fenetre , SDL_WINDOWPOS_CENTERED 2 fois pour dire la position x et y où je veux que ma fenêtre soit, taille de la fenêtre large
     // puis haut, et 0 pour 0 options supplémentaires
     // Création du renderer pour pouvoir dessiner des points
@@ -20,6 +22,7 @@ int main(void) {
 
 
     // avant while 
+    
 
     Material rouge(255, 0, 0, 0);
     Sphere s(Vector3f(0.2f, 0.3f, 5.0f), 0.5f, rouge); 
@@ -35,13 +38,15 @@ int main(void) {
 
 
         // --- DEBUT DU DESSIN ---
-        for (int y = 0; y < 480; y++) {
-            for (int x = 0; x < 640; x++) {
+        for (int y = 0; y < y_taille; y++) {
+            for (int x = 0; x < x_taille; x++) {
                 // Ici, je remplace plus tard par le calcul du rayon
                 // On transforme x et y (0 à 640) en coordonnées centrées (-1.0 à 1.0)
                 // pour que le centre de l'écran soit (0,0)
-                float coord_x = (x - 320) / 320.0f;
-                float coord_y = (y - 240) / 240.0f;
+                //float coord_x = (x - x_taille/2) / 320.0f;
+                //float coord_y = (y - y_taille/2) / 240.0f;
+                float coord_x = (x - x_taille / 2.0f) / (x_taille / 2.0f);
+                float coord_y = (y - y_taille / 2.0f) / (y_taille / 2.0f);
 
                 // Création du rayon : 
                 // Origine : le pixel actuel (x, y) à une distance z=5
