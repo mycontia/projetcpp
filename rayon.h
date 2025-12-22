@@ -2,6 +2,8 @@
 #define RAYON_H
 #include <iostream>
 #include <cmath>
+//ajout d'un include
+#include <vector>
 
 class Vector3f {
     public :
