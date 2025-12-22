@@ -9,7 +9,7 @@ int main(void) {
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER);
     //taille de l'écran
     int y_taille = 640;
-    int x_taille = 640;
+    int x_taille = y_taille;
 
     SDL_Window* window = SDL_CreateWindow("Ray Tracing MVP0.1", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, x_taille, y_taille, 0);
     // fenetre , SDL_WINDOWPOS_CENTERED 2 fois pour dire la position x et y où je veux que ma fenêtre soit, taille de la fenêtre large
@@ -22,10 +22,10 @@ int main(void) {
 
 
     // avant while 
-    
+    Camera cam(Vector3f(0,0,-100),Vector3f());
 
     Material rouge(255, 0, 0, 0);
-    Sphere s(Vector3f(0.2f, 0.3f, 5.0f), 0.5f, rouge); 
+    Sphere s(Vector3f(0.2f, 0.3f, 1.0f), 0.5f, rouge); 
 
     bool running = true;
     while (running) {
@@ -49,11 +49,17 @@ int main(void) {
                 float coord_y = (y - y_taille / 2.0f) / (y_taille / 2.0f);
 
                 // Création du rayon : 
-                // Origine : le pixel actuel (x, y) à une distance z=5
-                // Direction : il regarde droit devant vers le fond de l'écran (z=-1)
-                Ray3f ray(Vector3f(coord_x, coord_y, 5), Vector3f(0, 0, -1));
+                
+                //Ray3f ray(cam.position_, Vector3f(coord_x, coord_y, 0));
+
+                // La direction est : PointSurEcran - PositionCaméra
+                Vector3f direction = Vector3f(coord_x, coord_y, 0) - cam.position_;
+                Ray3f ray(cam.position_, direction);
+
                 // ça ça va changer, c'est à dire que le rayon va être projeté de la caméra ves le pixel.
-                // donc l'origine sera bien (x,y,5) par exemple comme ça on ne change pas l'endroit 
+                // donc l'origine sera bien (x,y,-50) par exemple
+                // comme ça on ne change pas l'endroit 
+                //bon en fait là je place la caméra en origine x y -10
                 //bref c'est le 2.a ici
                 
 
