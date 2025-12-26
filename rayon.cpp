@@ -37,8 +37,77 @@ bool egal (Vector3f v1, Vector3f v2)  {
             return ((v1.x_ == v2.x_) && (v1.y_ == v2.y_) && (v1.z_ == v2.z_));
         };
 
+//PROPSE PAR GEMINI
+bool Cube::est_dans_surf(Vector3f w, Vector3f h, Vector3f d, Vector3f direction, Vector3f v) const {
+    float dist_u = 0, dist_v = 0;
+    float max_u = 0, max_v = 0;
 
-bool Cube::is_hit(Ray3f ray) const{
+    // 'direction' ici est la normale de la face que tu as envoyée
+    // On compare avec les axes normalisés pour savoir sur quel plan on projette
+    Vector3f w_n = w.normalise();
+    Vector3f h_n = h.normalise();
+    Vector3f d_n = d.normalise();
+
+    if (std::abs(prod_scal(direction, h_n)) > 0.9f) { 
+        // Face Haut/Bas : on teste par rapport à Width et Depth
+        dist_u = prod_scal(v, w_n);
+        dist_v = prod_scal(v, d_n);
+        max_u = w.norme() * 0.5f;
+        max_v = d.norme() * 0.5f;
+    } 
+    else if (std::abs(prod_scal(direction, w_n)) > 0.9f) { 
+        // Face Droite/Gauche : on teste par rapport à Height et Depth
+        dist_u = prod_scal(v, h_n);
+        dist_v = prod_scal(v, d_n);
+        max_u = h.norme() * 0.5f;
+        max_v = d.norme() * 0.5f;
+    } 
+    else { 
+        // Face Devant/Derrière : on teste par rapport à Width et Height
+        dist_u = prod_scal(v, w_n);
+        dist_v = prod_scal(v, h_n);
+        max_u = w.norme() * 0.5f;
+        max_v = h.norme() * 0.5f;
+    }
+
+    return (std::abs(dist_u) <= max_u && std::abs(dist_v) <= max_v);
+}
+//MA FONCTION 
+/* 
+        bool Cube::est_dans_surf(Vector3f w,  Vector3f h, Vector3f d, Vector3f direction, Vector3f v) const{
+            Vector3f depth = prod_vect(width_,height_);
+
+            float dist_u = 0;
+            float dist_v = 0;
+            float max_u = 0;
+            float max_v = 0;
+
+            if (egal(direction,width_) || egal(direction,width_ * -1)) {
+                // Face Haut ou Bas
+                dist_u = prod_scal(v, w);
+                dist_v = prod_scal(v, d);
+                max_u = width_.norme() * 0.5f;
+                max_v = depth.norme() * 0.5f;
+            } 
+            else if (egal(direction,height_) || egal(direction,height_ * -1)) {
+                // Face Droite ou Gauche 
+                dist_u = prod_scal(v, h);
+                dist_v = prod_scal(v, d);
+                max_u = height_.norme() * 0.5f;
+                max_v = depth.norme() * 0.5f;
+            } 
+            else {
+                // Face Devant ou Derrière 
+                dist_u = prod_scal(v, w);
+                dist_v = prod_scal(v, h);
+                max_u = width_.norme() * 0.5f;
+                max_v = height_.norme() * 0.5f;
+            }
+            return (((std::abs(dist_u) <= max_u) && (std::abs(dist_v) <= max_v))); // Le point est à l'intérieur 
+
+}
+*/
+bool Cube::is_hit(Ray3f ray){
 
     Vector3f width_norm = width_.normalise();  // vecteur normalisé 
     Vector3f height_norm = height_.normalise();
@@ -106,11 +175,10 @@ bool Cube::is_hit(Ray3f ray) const{
     }
 
     std::vector<float>::iterator it_ps= ps.begin();
-    std::vector<float>::iterator it_ps_fin= ps.end();
+    //std::vector<float>::iterator it_ps_fin= ps.end();
     std::vector<std::vector<Vector3f> >::iterator it_pt = pt.begin();
-    std::vector<Vector3f> reponse;
     
-    while (it_ps < it_ps_fin) {
+    while (it_ps < ps.end()) {
         float t = prod_scal(((*it_pt)[0] - ray.origin_),((*it_pt)[1]).normalise()) / (*it_ps);//distance entre l'origine du rayon et le point d'impact sur la face infinie du quad
         if (t<= 0){ // intersection derrière la caméra ? pas mettre 0 mais epsilon ? 
             it_ps = ps.erase(it_ps);
@@ -135,7 +203,7 @@ bool Cube::is_hit(Ray3f ray) const{
             (*it_pt).push_back(pt_inter); // les coordonnées du point d'intersection entre le rayon et la face infinie 
 
             Vector3f vect = (*it_pt)[2]- origin_; //vecteur centre du cube au point d'intersection 
-            bool est_dedans = est_dans_surf(width_norm, height_norm, depth_norm,(*it_pt)[1], vect);
+            bool est_dedans = Cube::est_dans_surf(width_norm, height_norm, depth_norm,(*it_pt)[1], vect);
             if (not est_dedans) {
                 it_ps = ps.erase(it_ps);  // inutile puisuqe les coordonnées qui insterscetent sont stockés dans reponse ( on libère juste de la mémoire ) 
                 it_pt = pt.erase(it_pt);//inutile mais si on met pas il faut augmanter quand meme l'iterateur donc attention 
@@ -148,7 +216,7 @@ bool Cube::is_hit(Ray3f ray) const{
 
     }
     }
-    return (reponse.size() > 0);
+    return (coord.size() > 0);
 
     
     // point appartenant a la face du haut 
@@ -204,4 +272,10 @@ Vector3f direction (Vector3f v, Vector3f w) {
     d.z_ = w.z_ - v.z_;
     return d;
 
+}
+
+
+
+Ray3f Cube::reflect(Ray3f ray) {
+    return ray; 
 }

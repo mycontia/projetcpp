@@ -170,42 +170,8 @@ class Cube : public Shape{
             matter_ = m;
         }
 
-        bool is_hit(Ray3f ray) const;
 
-        bool est_dans_surf(Vector3f w,  Vector3f h, Vector3f d, Vector3f direction, Vector3f v) const{
-            Vector3f depth = prod_vect(width_,height_);
-
-            float dist_u = 0;
-            float dist_v = 0;
-            float max_u = 0;
-            float max_v = 0;
-
-            if (egal(direction,width_) || egal(direction,width_ * -1)) {
-                // Face Haut ou Bas
-                dist_u = prod_scal(v, w);
-                dist_v = prod_scal(v, d);
-                max_u = width_.norme() * 0.5f;
-                max_v = depth.norme() * 0.5f;
-            } 
-            else if (egal(direction,height_) || egal(direction,height_ * -1)) {
-                // Face Droite ou Gauche 
-                dist_u = prod_scal(v, h);
-                dist_v = prod_scal(v, d);
-                max_u = height_.norme() * 0.5f;
-                max_v = depth.norme() * 0.5f;
-            } 
-            else {
-                // Face Devant ou Derrière 
-                dist_u = prod_scal(v, w);
-                dist_v = prod_scal(v, h);
-                max_u = width_.norme() * 0.5f;
-                max_v = height_.norme() * 0.5f;
-            }
-            return (((std::abs(dist_u) <= max_u) && (std::abs(dist_v) <= max_v))); // Le point est à l'intérieur 
-
-}
-
-
+        bool est_dans_surf(Vector3f w,  Vector3f h, Vector3f d, Vector3f direction, Vector3f v) const;
 
 /* 
             if (egal (direction,width_)){

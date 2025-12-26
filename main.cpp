@@ -21,10 +21,18 @@ int main(void) {
 
 
     // avant while 
-    Camera cam(Vector3f(0,0,-100),Vector3f());
+    //Camera cam(Vector3f(0,0,-100),Vector3f());
+    Camera cam(Vector3f(0, 0, -5), Vector3f(0, 0, 1));
 
     Material rouge(255, 0, 0, 0);
-    Sphere s(Vector3f(0.2f, 0.3f, 1.0f), 0.5f, rouge); 
+    Material bleu(0, 0, 255, 0);
+    //Sphere s(Vector3f(0.2f, 0.3f, 1.0f), 0.5f, rouge); 
+    //Cube c(Vector3f(1.0f, 1.0f, 1.0f),Vector3f(0.1f, 0.2f, 0.6f),Vector3f(0.3f, 0.6f, 0.4f),bleu);
+    Cube c(Vector3f(0.0f, 0.0f, 2.0f), Vector3f(0, 1, 0), Vector3f(1, 0, 0), bleu);
+    Sphere s(Vector3f(-1.5f, 0.0f, 2.0f), 0.5f, rouge);
+
+
+
 
     bool running = true;
     while (running) {
@@ -73,7 +81,8 @@ int main(void) {
                 //Ray3f ray(cam.position_, Vector3f(coord_x, coord_y, 0));
 
                 // La direction est : PointSurEcran - PositionCaméra
-                Vector3f direction = Vector3f(coord_x, coord_y, 0) - cam.position_;
+                //Vector3f direction = Vector3f(coord_x, coord_y, 0) - cam.position_;
+                Vector3f direction = (Vector3f(coord_x, coord_y, -2.0f) - cam.position_).normalise();
                 Ray3f ray(cam.position_, direction);
 
                 // ça ça va changer, c'est à dire que le rayon va être projeté de la caméra ves le pixel.
@@ -84,8 +93,11 @@ int main(void) {
                 
 
                 // je veux en x en y et en z en fonction de sphere
-                if (s.is_hit(ray)) {
-                    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+
+                if (c.is_hit(ray)) {
+                    SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);// Couleur du cube (Bleu)
+                } else if (s.is_hit(ray)) {
+                    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);// Couleur de la sphère (Rouge)
                 } else {
                     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
                 }
