@@ -10,7 +10,6 @@ int main(void) {
     //taille de l'écran
     int y_taille = 640;
     int x_taille = y_taille;
-
     SDL_Window* window = SDL_CreateWindow("Ray Tracing MVP0.1", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, x_taille, y_taille, 0);
     // fenetre , SDL_WINDOWPOS_CENTERED 2 fois pour dire la position x et y où je veux que ma fenêtre soit, taille de la fenêtre large
     // puis haut, et 0 pour 0 options supplémentaires
@@ -47,6 +46,27 @@ int main(void) {
                 //float coord_y = (y - y_taille/2) / 240.0f;
                 float coord_x = (x - x_taille / 2.0f) / (x_taille / 2.0f);
                 float coord_y = (y - y_taille / 2.0f) / (y_taille / 2.0f);
+
+/*
+                int lignes = 400;
+                int colonnes = 350;
+
+                stv::vector<std::vector<pair>> v(lignes, std::vector<pair>(colonnes, 0.0f));
+                for (int x = 0; x < x_taille; x++) {
+                        v[x][0].first = x_taille/2;
+                    for (int y = 1; y < y_taille; y++) {
+                        v[x][y] = v[x][y-1] +1;
+                
+
+                for (int y = 0; y < y_taille; y++){
+                    v[0][y].second = y_taille/2;
+                    for (int x = 0; x < x_taille; x++) {
+                        v[y][x] = v[y][x-1] +1;
+
+                    }
+
+                }        
+*/                        
 
                 // Création du rayon : 
                 
@@ -90,3 +110,5 @@ int main(void) {
     SDL_Quit(); 
     return 0;
 }
+
+    

@@ -20,7 +20,13 @@ class Vector3f {
             y_ = y;
             z_ = z;   
         }
-
+        Vector3f operator+ (Vector3f v1) const {  // const car on ne veut pas modifier le vecteur; & ? vect3f n'est pas une grosse struct 
+            Vector3f v;
+            v.x_ =  x_ + v1.x_;  //ATENTION A L'ORDRE
+            v.y_ = y_ + v1.y_;
+            v.z_ =  z_ + v1.z_;
+            return v;
+        }
         Vector3f operator- (Vector3f v1) const {  // const car on ne veut pas modifier le vecteur; & ? vect3f n'est pas une grosse struct 
             Vector3f v;
             v.x_ =  x_ - v1.x_;  //ATENTION A L'ORDRE
@@ -46,7 +52,7 @@ class Vector3f {
             return v;
         }
 
-        Vector3f direction (Vector3f v) const{
+        Vector3f directionV (Vector3f v) const{
             Vector3f d;
             d.x_ = v.x_ - x_;
             d.y_ = v.y_ - y_;
@@ -55,15 +61,30 @@ class Vector3f {
 
         }
 
-        float norm () const{  //normalisation 
+        float norme () const{  //normalisation 
             float n;
-            n = pow(pow(x_,2) + pow(y_,2) + pow(z_,2), 1/2);
+            n = std::sqrt(x_ * x_ + y_ * y_ + z_ * z_);
             return n; 
 
+        }
+
+        Vector3f normalise() const{ //normalise un vecteur 
+            float n = norme();
+            Vector3f v = Vector3f(0, 0, 0);
+            if (n>0){
+                float m = 1.0f / n;
+                v.x_= x_ * m;
+                v.y_ = y_ * m;
+                v.z_ = z_* m;
+            }
+            return v;
         }
 };
 
 float prod_scal (Vector3f v1, Vector3f v2);
+Vector3f prod_vect(Vector3f v1, Vector3f v2);
+Vector3f direction (Vector3f v, Vector3f w);
+bool egal (Vector3f v1, Vector3f v2);
 
 class Ray3f {
     public: 
@@ -124,27 +145,127 @@ class Shape {
         virtual bool is_hit(Ray3f ray) =0 ;  // & ? pas grosse struct 
         virtual Ray3f reflect(Ray3f ray)=0;
 
+
 };
+
+
 
 
 class Cube : public Shape{
     public: 
         Vector3f origin_; 
-        Vector3f width_;
         Vector3f height_;
+        Vector3f width_; // pour faire des paralélépipèdes
         Cube(){
             origin_ = Vector3f();
-            width_= Vector3f();
             height_ = Vector3f();
+            width_ = Vector3f();
             matter_ = Material();
         }
 
-        Cube(Vector3f o, Vector3f w, Vector3f h, Material m){
+        Cube(Vector3f o, Vector3f h,Vector3f w, Material m){
             origin_ = o;
-            width_= w;
             height_ = h;
+            width_ = w;
             matter_ = m;
         }
+
+        bool is_hit(Ray3f ray) const;
+
+        bool est_dans_surf(Vector3f w,  Vector3f h, Vector3f d, Vector3f direction, Vector3f v) const{
+            Vector3f depth = prod_vect(width_,height_);
+
+            float dist_u = 0;
+            float dist_v = 0;
+            float max_u = 0;
+            float max_v = 0;
+
+            if (egal(direction,width_) || egal(direction,width_ * -1)) {
+                // Face Haut ou Bas
+                dist_u = prod_scal(v, w);
+                dist_v = prod_scal(v, d);
+                max_u = width_.norme() * 0.5f;
+                max_v = depth.norme() * 0.5f;
+            } 
+            else if (egal(direction,height_) || egal(direction,height_ * -1)) {
+                // Face Droite ou Gauche 
+                dist_u = prod_scal(v, h);
+                dist_v = prod_scal(v, d);
+                max_u = height_.norme() * 0.5f;
+                max_v = depth.norme() * 0.5f;
+            } 
+            else {
+                // Face Devant ou Derrière 
+                dist_u = prod_scal(v, w);
+                dist_v = prod_scal(v, h);
+                max_u = width_.norme() * 0.5f;
+                max_v = height_.norme() * 0.5f;
+            }
+            return (((std::abs(dist_u) <= max_u) && (std::abs(dist_v) <= max_v))); // Le point est à l'intérieur 
+
+}
+
+
+
+/* 
+            if (egal (direction,width_)){
+            float dist_u = prod_scal(direction,depth );
+            float dist_v = prod_scal(direction, height_);
+            }
+                else {
+                    if (egal(direction, width_ * (-1))){
+                    float dist_u = prod_scal(direction,depth* (-1) );
+                    float dist_v= prod_scal(direction, height_* (-1));
+                    }
+                    else {
+                        if (egal(direction,height_)){
+                        float dist_u = prod_scal(direction,depth);
+                        float dist_v = prod_scal(direction, width_);
+                        }
+                        else{
+                            if (egal(direction,height_ * (-1))){
+                            float dist_u = prod_scal(direction,depth* (-1) );
+                            float dist_v = prod_scal(direction, width_* (-1));
+                            }
+                            else{
+                                if (egal(direction,depth)){
+                                float dist_u = prod_scal(direction,width_ );
+                                float dist_v= prod_scal(direction, height_);
+                                }
+                                else{
+                                    if (egal(direction, width_ * (-1))){
+                                    float dist_u = prod_scal(direction,width_* (-1) );
+                                    float dist_v = prod_scal(direction, height_* (-1));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+        }
+
+*/
+
+
+/*
+        std::vector<Vector3f> vect_normal(){
+            std::vector<Vector3f> v;
+
+            Vector3f depth = prod_vect(width_, height_);
+            
+            // face haut 
+            
+
+
+            // face devant 
+            
+            
+            //face coté 
+            
+
+            return v;
+        }
+*/
         bool is_hit(Ray3f ray);
         Ray3f reflect(Ray3f ray);
 
@@ -154,6 +275,7 @@ class Quad : public Shape{
     public: 
         Vector3f origin_; 
         Vector3f width_;
+
         Vector3f height_;
         Quad(){
             origin_ = Vector3f();
@@ -168,6 +290,8 @@ class Quad : public Shape{
             height_ = h;
             matter_ = m;
         }
+
+
         bool is_hit(Ray3f ray);
         Ray3f reflect(Ray3f ray);
 };
