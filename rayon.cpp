@@ -36,7 +36,7 @@ bool egal (Vector3f v1, Vector3f v2)  {
             
             return ((v1.x_ == v2.x_) && (v1.y_ == v2.y_) && (v1.z_ == v2.z_));
         };
-
+/*
 //PROPSE PAR GEMINI
 bool Cube::est_dans_surf(Vector3f w, Vector3f h, Vector3f d, Vector3f direction, Vector3f v) const {
     float dist_u = 0, dist_v = 0;
@@ -72,8 +72,9 @@ bool Cube::est_dans_surf(Vector3f w, Vector3f h, Vector3f d, Vector3f direction,
 
     return (std::abs(dist_u) <= max_u && std::abs(dist_v) <= max_v);
 }
+*/
 //MA FONCTION 
-/* 
+
         bool Cube::est_dans_surf(Vector3f w,  Vector3f h, Vector3f d, Vector3f direction, Vector3f v) const{
             Vector3f depth = prod_vect(width_,height_);
 
@@ -106,7 +107,7 @@ bool Cube::est_dans_surf(Vector3f w, Vector3f h, Vector3f d, Vector3f direction,
             return (((std::abs(dist_u) <= max_u) && (std::abs(dist_v) <= max_v))); // Le point est à l'intérieur 
 
 }
-*/
+
 bool Cube::is_hit(Ray3f ray){
 
     Vector3f width_norm = width_.normalise();  // vecteur normalisé 
@@ -127,7 +128,7 @@ bool Cube::is_hit(Ray3f ray){
         ps.push_back(-prod_H);
 
         std::vector<Vector3f> haut; 
-        haut.push_back(origin_ + height_ ); 
+        haut.push_back(origin_ + height_ * 0.5f); 
         haut.push_back(height_);         
         pt.push_back(haut);
 
@@ -144,7 +145,7 @@ bool Cube::is_hit(Ray3f ray){
         ps.push_back(-prod_D);
 
         std::vector<Vector3f> devant; 
-        devant.push_back(origin_ + depth_ ); 
+        devant.push_back(origin_ + depth_* 0.5f ); 
         devant.push_back(depth_);         
         pt.push_back(devant);
 
@@ -161,7 +162,7 @@ bool Cube::is_hit(Ray3f ray){
         ps.push_back(-prod_W);
         
         std::vector<Vector3f> droite; 
-        droite.push_back(origin_ + width_ ); 
+        droite.push_back(origin_ + width_* 0.5f ); 
         droite.push_back(width_);         
         pt.push_back(droite);
 
@@ -177,7 +178,36 @@ bool Cube::is_hit(Ray3f ray){
     std::vector<float>::iterator it_ps= ps.begin();
     //std::vector<float>::iterator it_ps_fin= ps.end();
     std::vector<std::vector<Vector3f> >::iterator it_pt = pt.begin();
-    
+
+/*
+    while (it_ps != ps.end()) {
+    // Calcul de t : (PointFace - OrigineRayon) . Normale / (DirectionRayon . Normale)
+    float t = prod_scal(((*it_pt)[0] - ray.origin_), (*it_pt)[1]) / (*it_ps);
+
+    if (t <= 0.001f) { // Si c'est derrière ou trop proche
+        it_ps = ps.erase(it_ps);
+        it_pt = pt.erase(it_pt);
+    } else {
+        Vector3f pt_inter = ray.origin_ + ray.direction_ * t;
+        
+        // VECTEUR TRES IMPORTANT : Point d'impact RELATIF au centre de la face
+        Vector3f vect_relatif = pt_inter - (*it_pt)[0]; 
+
+        // Appel avec TES arguments d'origine
+        bool est_dedans = est_dans_surf(width_, height_, depth_, (*it_pt)[1], vect_relatif);
+
+        if (est_dedans) {
+            coord.push_back(pt_inter);
+            it_ps++;
+            it_pt++;
+        } else {
+            it_ps = ps.erase(it_ps);
+            it_pt = pt.erase(it_pt);
+        }
+    }
+}
+*/
+
     while (it_ps < ps.end()) {
         float t = prod_scal(((*it_pt)[0] - ray.origin_),((*it_pt)[1]).normalise()) / (*it_ps);//distance entre l'origine du rayon et le point d'impact sur la face infinie du quad
         if (t<= 0){ // intersection derrière la caméra ? pas mettre 0 mais epsilon ? 
@@ -202,8 +232,10 @@ bool Cube::is_hit(Ray3f ray){
             Vector3f pt_inter = ray.origin_ + ray.direction_ * t;
             (*it_pt).push_back(pt_inter); // les coordonnées du point d'intersection entre le rayon et la face infinie 
 
-            Vector3f vect = (*it_pt)[2]- origin_; //vecteur centre du cube au point d'intersection 
-            bool est_dedans = Cube::est_dans_surf(width_norm, height_norm, depth_norm,(*it_pt)[1], vect);
+            //Vector3f vect = (*it_pt)[2]- origin_; //vecteur centre du cube au point d'intersection 
+            Vector3f vect = pt_inter - (*it_pt)[0];
+            //bool est_dedans = Cube::est_dans_surf(width_norm, height_norm, depth_norm,(*it_pt)[1], vect);
+            bool est_dedans = est_dans_surf(width_, height_, depth_, (*it_pt)[1], vect);
             if (not est_dedans) {
                 it_ps = ps.erase(it_ps);  // inutile puisuqe les coordonnées qui insterscetent sont stockés dans reponse ( on libère juste de la mémoire ) 
                 it_pt = pt.erase(it_pt);//inutile mais si on met pas il faut augmanter quand meme l'iterateur donc attention 
@@ -216,6 +248,7 @@ bool Cube::is_hit(Ray3f ray){
 
     }
     }
+
     return (coord.size() > 0);
 
     
