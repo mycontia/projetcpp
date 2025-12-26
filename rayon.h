@@ -171,7 +171,7 @@ class Cube : public Shape{
         }
 
 
-        bool est_dans_surf(Vector3f w,  Vector3f h, Vector3f d, Vector3f direction, Vector3f v) const;
+        bool est_dans_surf(Vector3f w,  Vector3f h, Vector3f d, Vector3f direction, Vector3f v);
 
 /* 
             if (egal (direction,width_)){
@@ -260,6 +260,8 @@ class Quad : public Shape{
 
         bool is_hit(Ray3f ray);
         Ray3f reflect(Ray3f ray);
+        bool est_dans_surf(Vector3f v);
+
 };
 
 class Sphere : public Shape{

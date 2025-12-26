@@ -26,11 +26,12 @@ int main(void) {
 
     Material rouge(255, 0, 0, 0);
     Material bleu(0, 0, 255, 0);
+    Material vert(0, 255, 0, 0);
     //Sphere s(Vector3f(0.2f, 0.3f, 1.0f), 0.5f, rouge); 
     //Cube c(Vector3f(1.0f, 1.0f, 1.0f),Vector3f(0.1f, 0.2f, 0.6f),Vector3f(0.3f, 0.6f, 0.4f),bleu);
     Cube c(Vector3f(0.0f, 0.0f, 2.0f), Vector3f(0, 1, 0), Vector3f(1, 0, 0), bleu);
     Sphere s(Vector3f(-1.5f, 0.0f, 2.0f), 0.5f, rouge);
-
+    Quad q(Vector3f(0.0f, 0.0f, 2.0f), Vector3f(0.1f, 0.2f, 0.1f), Vector3f(0.4f, 0.1f, 0.1f), vert);
 
 
 
@@ -94,10 +95,12 @@ int main(void) {
 
                 // je veux en x en y et en z en fonction de sphere
 
-                if (c.is_hit(ray)) {
-                    SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);// Couleur du cube (Bleu)
+                if (q.is_hit(ray)) {
+                    SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);// Couleur du Quad (Vert)
                 } else if (s.is_hit(ray)) {
                     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);// Couleur de la sphère (Rouge)
+                } else if (c.is_hit(ray)) {
+                    SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);// Couleur du cube (Bleu)
                 } else {
                     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
                 }

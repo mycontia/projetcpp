@@ -2,10 +2,50 @@
 #include<iostream>
 
 // Simulation d'un plan en z = 0 (On dit que ça touche si le rayon descend)
-bool Quad::is_hit(Ray3f ray) {
+/* bool Quad::is_hit(Ray3f ray) {
     return ray.direction_.z_ < 0; 
 }
 
+*/
+
+bool Quad::est_dans_surf(Vector3f v){
+    
+    // Face Devant ou Derrière 
+    float dist_u = prod_scal(v, width_.normalise());
+    float dist_v = prod_scal(v, height_.normalise());
+    float max_u = width_.norme() * 0.5f;
+    float max_v = height_.norme() * 0.5f;
+    return (((std::abs(dist_u) <= max_u) && (std::abs(dist_v) <= max_v))); // Le point est à l'intérieur 
+
+}
+
+
+bool Quad::is_hit(Ray3f ray){
+
+    Vector3f depth_= prod_vect(width_, height_);
+    Vector3f depth_norm = depth_.normalise();
+
+    float prod_D = prod_scal(ray.direction_,depth_norm);
+
+
+    //si le produit scalaire entre la direction du rayon et la normale à une des 6 surfaces vaut 0 alors ces deux vecteurs sont perpendiculaires et donc le rayon est parallèle à la surface en question 
+
+    if (prod_D == 0){
+        return false;
+    }
+     
+    float t = prod_scal((origin_ - ray.origin_),depth_norm) / (prod_D);//distance entre l'origine du rayon et le point d'impact sur la face infinie du quad
+    if (t<= 0){ // intersection derrière la caméra ? pas mettre 0 mais epsilon ? 
+        return false;
+    }
+    Vector3f pt_inter = ray.origin_ + ray.direction_ * t; 
+
+            //Vector3f vect = (*it_pt)[2]- origin_; //vecteur centre du cube au point d'intersection 
+            Vector3f vect = pt_inter - origin_;
+            //bool est_dedans = Cube::est_dans_surf(width_norm, height_norm, depth_norm,(*it_pt)[1], vect);
+            return(est_dans_surf(vect));
+ 
+}
 // bool Sphere::is_hit(Ray3f ray) {
 //     //C'est pour un point ici
 //     return (ray.origin_.x_ > -0.01+this->origin_.x_ && ray.origin_.x_ < 0.01 + this->origin_.x_ &&
@@ -73,9 +113,56 @@ bool Cube::est_dans_surf(Vector3f w, Vector3f h, Vector3f d, Vector3f direction,
     return (std::abs(dist_u) <= max_u && std::abs(dist_v) <= max_v);
 }
 */
-//MA FONCTION 
 
-        bool Cube::est_dans_surf(Vector3f w,  Vector3f h, Vector3f d, Vector3f direction, Vector3f v) const{
+
+bool Cube::est_dans_surf(Vector3f w, Vector3f h, Vector3f d, Vector3f normale_face, Vector3f v) {
+    // 1. On prépare les normales unitaires des axes du cube
+    Vector3f w_n = w.normalise();
+    Vector3f h_n = h.normalise();
+    Vector3f d_n = d.normalise();
+
+    float dist_u = 0;
+    float dist_v = 0;
+    float max_u = 0;
+    float max_v = 0;
+
+    // 2. On identifie la face en comparant la normale de la face aux axes du cube
+    // On utilise la normale de la face passée en paramètre
+    Vector3f n_f = normale_face.normalise();
+
+    if (egal(n_f, h_n) || egal(n_f, h_n * -1.0f)) {
+        // Face Haut ou Bas (le plan est formé par Width et Depth)
+        dist_u = prod_scal(v, w_n);
+        dist_v = prod_scal(v, d_n);
+        max_u = w.norme() * 0.5f;
+        max_v = d.norme() * 0.5f;
+    } 
+    else if (egal(n_f, w_n) || egal(n_f, w_n * -1.0f)) {
+        // Face Droite ou Gauche (le plan est formé par Height et Depth)
+        dist_u = prod_scal(v, h_n);
+        dist_v = prod_scal(v, d_n);
+        max_u = h.norme() * 0.5f;
+        max_v = d.norme() * 0.5f;
+    } 
+    else {
+        // Face Devant ou Derrière (le plan est formé par Width et Height)
+        dist_u = prod_scal(v, w_n);
+        dist_v = prod_scal(v, h_n);
+        max_u = w.norme() * 0.5f;
+        max_v = h.norme() * 0.5f;
+    }
+
+    // 3. Test de présence dans le rectangle
+    // On utilise une petite marge (0.0001) pour éviter les problèmes de précision flottante
+    return (std::abs(dist_u) <= (max_u + 0.0001f) && std::abs(dist_v) <= (max_v + 0.0001f));
+}
+
+
+
+//MA FONCTION
+
+/*
+        bool Cube::est_dans_surf(Vector3f w,  Vector3f h, Vector3f d, Vector3f direction, Vector3f v){
             Vector3f depth = prod_vect(width_,height_);
 
             float dist_u = 0;
@@ -107,7 +194,7 @@ bool Cube::est_dans_surf(Vector3f w, Vector3f h, Vector3f d, Vector3f direction,
             return (((std::abs(dist_u) <= max_u) && (std::abs(dist_v) <= max_v))); // Le point est à l'intérieur 
 
 }
-
+*/
 bool Cube::is_hit(Ray3f ray){
 
     Vector3f width_norm = width_.normalise();  // vecteur normalisé 
@@ -208,7 +295,11 @@ bool Cube::is_hit(Ray3f ray){
 }
 */
 
-    while (it_ps < ps.end()) {
+
+
+//le bon 
+
+    while (it_ps != ps.end()) {
         float t = prod_scal(((*it_pt)[0] - ray.origin_),((*it_pt)[1]).normalise()) / (*it_ps);//distance entre l'origine du rayon et le point d'impact sur la face infinie du quad
         if (t<= 0){ // intersection derrière la caméra ? pas mettre 0 mais epsilon ? 
             it_ps = ps.erase(it_ps);
@@ -217,16 +308,6 @@ bool Cube::is_hit(Ray3f ray){
         }
         else {
 
-
-
-/* 
-            std::pair<bool,Vector3f> reponse; 
-            if(reponse.first == false ){
-                it_ps = ps.erase(it_ps);
-                it_pt = pt.erase(it_pt);
-            }
-            (*it_pt).push_back(reponse.second);
-*/
 
 
             Vector3f pt_inter = ray.origin_ + ray.direction_ * t;
@@ -250,8 +331,8 @@ bool Cube::is_hit(Ray3f ray){
     }
 
     return (coord.size() > 0);
+}
 
-    
     // point appartenant a la face du haut 
     //Vector3f A_h = origin_ + height_ * (1/2);
     // point appartenant a la face du bas 
@@ -280,7 +361,7 @@ bool Cube::is_hit(Ray3f ray){
     // }
 
  
-}
+
 
 
 
@@ -306,7 +387,6 @@ Vector3f direction (Vector3f v, Vector3f w) {
     return d;
 
 }
-
 
 
 Ray3f Cube::reflect(Ray3f ray) {
