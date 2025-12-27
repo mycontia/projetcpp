@@ -86,6 +86,7 @@ Vector3f prod_vect(Vector3f v1, Vector3f v2);
 Vector3f direction (Vector3f v, Vector3f w);
 bool egal (Vector3f v1, Vector3f v2);
 
+
 class Ray3f {
     public: 
         Vector3f origin_; 
@@ -142,10 +143,9 @@ class Shape {
     public: 
         Material matter_; 
 
-        virtual bool is_hit(Ray3f ray) =0 ;  // & ? pas grosse struct 
+        virtual std::pair<bool,Vector3f> is_hit(Ray3f ray) =0 ;  // & ? pas grosse struct 
+        // renvoie un couple indiquant s'il y a intersection et si oui renvoie le point le plus proche sinon renvoie 0
         virtual Ray3f reflect(Ray3f ray)=0;
-
-
 };
 
 
@@ -171,68 +171,8 @@ class Cube : public Shape{
         }
 
 
-        bool est_dans_surf(Vector3f w,  Vector3f h, Vector3f d, Vector3f direction, Vector3f v);
 
-/* 
-            if (egal (direction,width_)){
-            float dist_u = prod_scal(direction,depth );
-            float dist_v = prod_scal(direction, height_);
-            }
-                else {
-                    if (egal(direction, width_ * (-1))){
-                    float dist_u = prod_scal(direction,depth* (-1) );
-                    float dist_v= prod_scal(direction, height_* (-1));
-                    }
-                    else {
-                        if (egal(direction,height_)){
-                        float dist_u = prod_scal(direction,depth);
-                        float dist_v = prod_scal(direction, width_);
-                        }
-                        else{
-                            if (egal(direction,height_ * (-1))){
-                            float dist_u = prod_scal(direction,depth* (-1) );
-                            float dist_v = prod_scal(direction, width_* (-1));
-                            }
-                            else{
-                                if (egal(direction,depth)){
-                                float dist_u = prod_scal(direction,width_ );
-                                float dist_v= prod_scal(direction, height_);
-                                }
-                                else{
-                                    if (egal(direction, width_ * (-1))){
-                                    float dist_u = prod_scal(direction,width_* (-1) );
-                                    float dist_v = prod_scal(direction, height_* (-1));
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    
-        }
-
-*/
-
-
-/*
-        std::vector<Vector3f> vect_normal(){
-            std::vector<Vector3f> v;
-
-            Vector3f depth = prod_vect(width_, height_);
-            
-            // face haut 
-            
-
-
-            // face devant 
-            
-            
-            //face coté 
-            
-
-            return v;
-        }
-*/
-        bool is_hit(Ray3f ray);
+        std::pair<bool,Vector3f> is_hit(Ray3f ray);
         Ray3f reflect(Ray3f ray);
 
 };
@@ -241,8 +181,8 @@ class Quad : public Shape{
     public: 
         Vector3f origin_; 
         Vector3f width_;
-
         Vector3f height_;
+        virtual ~Quad() {};
         Quad(){
             origin_ = Vector3f();
             width_= Vector3f();
@@ -258,7 +198,7 @@ class Quad : public Shape{
         }
 
 
-        bool is_hit(Ray3f ray);
+        std::pair<bool,Vector3f> is_hit(Ray3f ray);
         Ray3f reflect(Ray3f ray);
         bool est_dans_surf(Vector3f v);
 
@@ -280,7 +220,7 @@ class Sphere : public Shape{
             radius_= r;
             matter_ = m;
         }
-        bool is_hit(Ray3f ray);
+        std::pair<bool,Vector3f> is_hit(Ray3f ray);
         Ray3f reflect(Ray3f ray);
 };
 
@@ -293,10 +233,5 @@ class Scene {
         void render(int width, int height, std::string filename);
 
 };
-
-// class Grille {
-//     int width_;
-//     int height_; 
-// };
 
 #endif
