@@ -44,9 +44,9 @@ int main(void) {
         return -1;
     }
    
-    Cube c(Vector3f(0.0f, 0.0f, 2.0f), h, w, bleu);
-    Sphere s(Vector3f(-1.5f, 0.0f, 2.0f), 0.5f, rouge);
-    Quad q(Vector3f(0.0f, 0.0f, 2.0f), Vector3f(0.1f, 0.2f, 0.1f), Vector3f(0.4f, 0.1f, 0.1f), vert);
+    Cube c(Vector3f(-1.5f, 1.5f, 2.0f), h, w, bleu);
+    Sphere s(Vector3f(-1.5f, 0.5f, 2.0f), 0.5f, rouge);
+    Quad q(Vector3f(0.5f, -0.5f, 2.0f), Vector3f(0.1f, 0.2f, 0.1f), Vector3f(0.4f, 0.1f, 0.1f), vert);
 
 
 
@@ -69,7 +69,8 @@ int main(void) {
                 //float coord_x = (x - x_taille/2) / 320.0f;
                 //float coord_y = (y - y_taille/2) / 240.0f;
                 float coord_x = (x - x_taille / 2.0f) / (x_taille / 2.0f);
-                float coord_y = (y - y_taille / 2.0f) / (y_taille / 2.0f);
+                //la sdl foncitonne ainsi l axe des y est vers le bas
+                float coord_y = -(y - y_taille / 2.0f) / (y_taille / 2.0f);
 
 /*
                 int lignes = 400;
