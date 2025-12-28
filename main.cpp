@@ -43,8 +43,8 @@ int main(void) {
     Material bleu(0, 0, 255, 0);
     Material vert(0, 255, 0, 0);
 
-    Cube* c = new Cube(Vector3f(0.4f, 0.0f, 0.3f), h, w, bleu);
-    Sphere* s = new Sphere(Vector3f(-0.5f, 0.0f, 1.0f), 0.5f, rouge);
+    Cube* c = new Cube(Vector3f(-0.4f, 0.0f, 0.3f), h, w, bleu);
+    Sphere* s = new Sphere(Vector3f(0.5f, 0.0f, 1.0f), 0.5f, rouge);
     Quad* q = new Quad(Vector3f(0.5f, -0.5f, 2.0f), Vector3f(0.1f, 0.2f, 0.1f), Vector3f(0.4f, 0.1f, 0.1f), vert);
     Quad* qback = new Quad(
         Vector3f(0.0f, 0.0f, 2.0f), // Centre du quad
@@ -82,12 +82,14 @@ int main(void) {
     scene.shapes_.push_back(c);
     scene.shapes_.push_back(s);
     scene.shapes_.push_back(q);
-    scene.shapes_.push_back(qup);
+    //scene.shapes_.push_back(qup);
     scene.shapes_.push_back(qdown);
     scene.shapes_.push_back(qleft);
-    scene.shapes_.push_back(qright);
+    //scene.shapes_.push_back(qright);
     scene.shapes_.push_back(qback);
     scene.source_ = Ray3f(Vector3f(5, 5, -5), Vector3f(0, 0, 1));
+    //scene.source_ = Ray3f(Vector3f(5, 5, -5), Vector3f(0, 0.7, 1));
+    //scene.source_ = Ray3f(Vector3f(0, 10.99, 1), Vector3f(0, 0, 0));
 
 
     bool running = true;
@@ -168,8 +170,42 @@ int main(void) {
                         }
                     }
                 }
+                
                 if (shape_proche != nullptr) {
-                    draw_color(renderer, shape_proche->matter_, scene.intensite(pt_proche)); 
+                    // rayon d'ombre
+                    Vector3f versLumiere = (scene.source_.origin_ - pt_proche.pt_inter).normalise();
+                    float distSource = (scene.source_.origin_ - pt_proche.pt_inter).norme();
+                    
+                    // On décale l'origine pour éviter l'auto-collision
+                    Ray3f rayOmbre(pt_proche.pt_inter + (pt_proche.norm * 0.001f), versLumiere);
+                    
+                    bool estDansLombre = false;
+
+                    // 2. Vérifier si un AUTRE objet (ou le même plus loin) intersecte
+                    for (size_t j = 0; j < scene.shapes_.size(); j++) {
+                        answer hitOmbre = scene.shapes_[j]->is_hit(rayOmbre);
+                        //float distObstacle = (hitOmbre.pt_inter - rayOmbre.origin_).norme();
+                        //float distObstacle = (hitOmbre.pt_inter - scene.source_.origin_).norme();
+                        float distObstacle = (scene.source_.origin_ - hitOmbre.pt_inter).norme();
+                        if (hitOmbre.hit) {
+                            if (distObstacle > 0.001f && distObstacle < distSource ) {
+                                estDansLombre = true;
+                                break; // On a trouvé un obstacle, pas la peine de continuer
+                            }
+                            
+                            
+                        }
+                    }
+
+                    // 3. Choix de la couleur finale
+                    if (estDansLombre) {
+                        // Colorer en noir (ou avec une intensité ambiante très faible)
+                        draw_color(renderer, shape_proche->matter_, 0.05f);
+                    } else {
+                        // comme tout à l heure
+                        draw_color(renderer, shape_proche->matter_, scene.intensite(pt_proche));
+                    }
+                    
                 }
                 //SDL_SetRenderDrawColor(renderer, (x % 255), (y % 255), 150, 255);
                 //SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);

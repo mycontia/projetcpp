@@ -87,6 +87,7 @@ answer Sphere::is_hit(Ray3f ray){
     }
     if (discriminent >= 0) {
         reponse.norm = (reponse.pt_inter - origin_).normalise();
+        
     }
     return reponse;
 }
@@ -175,6 +176,39 @@ float Scene::intensite(answer a) {
     }
     return 0;
 }
+
+// float Scene::intensite(answer a) {
+//     if (!a.hit) return 0.0f;
+
+//     float ambiant = 0.05f; // Lumière minimum (pour ne pas avoir un noir total)
+    
+//     //Ombre
+//     // On crée le vecteur qui va du point vers la source
+//     Vector3f dirLum = (source_.origin_ - a.pt_inter).normalise();
+//     float distLum = (source_.origin_ - a.pt_inter).norme();
+
+//     //rayon d'ombre (légèrement décalé pour éviter l'auto-collision)
+//     //Ray3f rayOmbre(a.pt_inter + (a.norm * 0.01f)+Vector3f(0,0.1,0.0), dirLum);
+//     Ray3f rayOmbre(a.pt_inter+ (a.norm * 0.01f), dirLum);
+
+//     // 3. On regarde si ce rayon touche un objet AVANT la lumière
+//     for (size_t i = 0; i < shapes_.size(); i++) {
+//         answer repOmbre = shapes_[i]->is_hit(rayOmbre);
+//         if (repOmbre.hit) {
+//             float distObstacle = (repOmbre.pt_inter - rayOmbre.origin_).norme();
+//             if (distObstacle < 0.9*distLum) {
+//                 //return ambiant; // ombre
+//                 return ambiant;
+//             }
+//         }
+//     }
+
+//     ///pas d ombre
+//     Vector3f v1 = a.norm;
+//     Vector3f v2 = dirLum; 
+//     return (ambiant + 0.8f * max(0.0f, prod_scal(v1, v2)));
+//     return 1;
+// }
 
 
 void draw_color(SDL_Renderer* rend, Material col, float intens){
