@@ -4,6 +4,7 @@
 #include <cmath>
 //ajout d'un include
 #include <vector>
+#include <SDL2/SDL.h>
 
 class Vector3f {
     public :
@@ -81,10 +82,18 @@ class Vector3f {
         }
 };
 
+struct answer {
+    bool hit;
+    Vector3f pt_inter;
+    Vector3f norm;
+};
+
 float prod_scal (Vector3f v1, Vector3f v2);
 Vector3f prod_vect(Vector3f v1, Vector3f v2);
 Vector3f direction (Vector3f v, Vector3f w);
 bool egal (Vector3f v1, Vector3f v2);
+float max(float a, float b);
+
 
 
 class Ray3f {
@@ -143,7 +152,7 @@ class Shape {
     public: 
         Material matter_; 
 
-        virtual std::pair<bool,Vector3f> is_hit(Ray3f ray) =0 ;  // & ? pas grosse struct 
+        virtual answer is_hit(Ray3f ray) =0 ;  // & ? pas grosse struct 
         // renvoie un couple indiquant s'il y a intersection et si oui renvoie le point le plus proche sinon renvoie 0
         virtual Ray3f reflect(Ray3f ray)=0;
 };
@@ -172,7 +181,7 @@ class Cube : public Shape{
 
 
 
-        std::pair<bool,Vector3f> is_hit(Ray3f ray);
+        answer is_hit(Ray3f ray);
         Ray3f reflect(Ray3f ray);
 
 };
@@ -198,7 +207,7 @@ class Quad : public Shape{
         }
 
 
-        std::pair<bool,Vector3f> is_hit(Ray3f ray);
+        answer is_hit(Ray3f ray);
         Ray3f reflect(Ray3f ray);
         bool est_dans_surf(Vector3f v);
 
@@ -220,7 +229,7 @@ class Sphere : public Shape{
             radius_= r;
             matter_ = m;
         }
-        std::pair<bool,Vector3f> is_hit(Ray3f ray);
+        answer is_hit(Ray3f ray);
         Ray3f reflect(Ray3f ray);
 };
 
@@ -230,8 +239,12 @@ class Scene {
         Camera camera_; 
         std::vector<Shape*> shapes_;
         Ray3f source_;
+        float intensite(answer a);
         void render(int width, int height, std::string filename);
 
+
 };
+
+void draw_color(SDL_Renderer* rend, Material col, float intens);
 
 #endif

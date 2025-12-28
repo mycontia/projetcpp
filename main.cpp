@@ -3,7 +3,6 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <iostream>
-#include <SDL2/SDL.h>
 #include "rayon.h"
 
 int main(void) {
@@ -23,15 +22,8 @@ int main(void) {
 
     // avant while 
     //Camera cam(Vector3f(0,0,-100),Vector3f());
-    Camera cam(Vector3f(0, 0, -5), Vector3f(0, 0, 1));
 
-    Material rouge(255, 0, 0, 0);
-    Material bleu(0, 0, 255, 0);
-    Material vert(0, 255, 0, 0);
-    //Sphere s(Vector3f(0.2f, 0.3f, 1.0f), 0.5f, rouge); 
-    //Cube c(Vector3f(1.0f, 1.0f, 1.0f),Vector3f(0.1f, 0.2f, 0.6f),Vector3f(0.3f, 0.6f, 0.4f),bleu);
-
-    Vector3f h = Vector3f(0, 1, 0);
+    Vector3f h = Vector3f(0, 1, 0.85f);
     Vector3f w = Vector3f(1, 0, 0);
     try{
 
@@ -43,11 +35,21 @@ int main(void) {
         std::cout << "Erreur : " << msg << "\n";
         return -1;
     }
-   
-    Cube c(Vector3f(-1.5f, 1.5f, 2.0f), h, w, bleu);
-    Sphere s(Vector3f(-1.5f, 0.5f, 2.0f), 0.5f, rouge);
-    Quad q(Vector3f(0.5f, -0.5f, 2.0f), Vector3f(0.1f, 0.2f, 0.1f), Vector3f(0.4f, 0.1f, 0.1f), vert);
 
+    Material rouge(255, 0, 0, 0);
+    Material bleu(0, 0, 255, 0);
+    Material vert(0, 255, 0, 0);
+
+    Cube* c = new Cube(Vector3f(0.8f, 0.5f, 2.0f), h, w, bleu);
+    Sphere* s = new Sphere(Vector3f(-1.5f, 0.0f, 2.0f), 0.5f, rouge);
+    Quad* q = new Quad(Vector3f(0.5f, -0.5f, 2.0f), Vector3f(0.1f, 0.2f, 0.1f), Vector3f(0.4f, 0.1f, 0.1f), vert);
+
+    Scene scene;
+    scene.camera_ = Camera(Vector3f(0, 0, -5), Vector3f(0, 0, 1));
+    scene.shapes_.push_back(c);
+    scene.shapes_.push_back(s);
+    scene.shapes_.push_back(q);
+    scene.source_ = Ray3f(Vector3f(0, 0, -5), Vector3f(0, 0, 1));
 
 
     bool running = true;
@@ -69,8 +71,7 @@ int main(void) {
                 //float coord_x = (x - x_taille/2) / 320.0f;
                 //float coord_y = (y - y_taille/2) / 240.0f;
                 float coord_x = (x - x_taille / 2.0f) / (x_taille / 2.0f);
-                //la sdl foncitonne ainsi l axe des y est vers le bas
-                float coord_y = -(y - y_taille / 2.0f) / (y_taille / 2.0f);
+                float coord_y = (y - y_taille / 2.0f) / (y_taille / 2.0f);
 
 /*
                 int lignes = 400;
@@ -99,8 +100,8 @@ int main(void) {
 
                 // La direction est : PointSurEcran - PositionCaméra
                 //Vector3f direction = Vector3f(coord_x, coord_y, 0) - cam.position_;
-                Vector3f direction = (Vector3f(coord_x, coord_y, -2.0f) - cam.position_).normalise();
-                Ray3f ray(cam.position_, direction);
+                Vector3f direction = (Vector3f(coord_x, coord_y, -2.0f) - scene.camera_.position_).normalise();
+                Ray3f ray(scene.camera_.position_, direction);
 
                 // ça ça va changer, c'est à dire que le rayon va être projeté de la caméra ves le pixel.
                 // donc l'origine sera bien (x,y,-50) par exemple
@@ -111,16 +112,27 @@ int main(void) {
 
                 // je veux en x en y et en z en fonction de sphere
 
-                if (q.is_hit(ray).first) {
-                    SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);// Couleur du Quad (Vert)
-                } else if (s.is_hit(ray).first) {
-                    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);// Couleur de la sphère (Rouge)
-                } else if (c.is_hit(ray).first) {
-                    SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);// Couleur du cube (Bleu)
-                } else {
-                    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-                }
+                // si un rayon traverse une forme puis une autre à la sortie de la première on ne veut voir que la première touchée par le rayon, celle cachée ne devant pas apparaitre sur la fenetre 
+                SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+                //SDL_RenderClear(renderer); //JONATHAN 
+                float dist_min = INFINITY;
+                Shape* shape_proche = nullptr; 
+                answer pt_proche;
 
+                for (size_t i =0; i< scene.shapes_.size(); i++){
+                    answer rep = scene.shapes_[i]->is_hit(ray);
+                    if (rep.hit) {
+                        float dist = (rep.pt_inter - scene.camera_.position_).norme();
+                        if (dist < dist_min) {
+                            dist_min = dist;
+                            shape_proche = scene.shapes_[i];
+                            pt_proche = rep;
+                        }
+                    }
+                }
+                if (shape_proche != nullptr) {
+                    draw_color(renderer, shape_proche->matter_, scene.intensite(pt_proche)); 
+                }
                 //SDL_SetRenderDrawColor(renderer, (x % 255), (y % 255), 150, 255);
                 //SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
                 //SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
@@ -142,4 +154,6 @@ int main(void) {
     return 0;
 }
 
+
     
+
