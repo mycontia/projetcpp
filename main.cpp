@@ -61,8 +61,8 @@ int main(void) {
     );
     Quad* qright = new Quad(
         Vector3f(1.0f, 0.0f, 1.0f), // Centre du quad
-        Vector3f(0.0f, 2.0f, 0.0f),  // Sa hauteur (Y)
-        Vector3f(0.0f, 0.0f, 2.0f),  // Sa longueur/profondeur (Z)
+        Vector3f(0.0f, 0.0f, 2.0f),  // Sa hauteur (Y)
+        Vector3f(0.0f, 2.0f, 0.0f),  // Sa longueur/profondeur (Z)
         vert
     );
     Quad* qup = new Quad(
@@ -87,7 +87,7 @@ int main(void) {
     scene.shapes_.push_back(qleft);
     scene.shapes_.push_back(qright);
     scene.shapes_.push_back(qback);
-    scene.source_ = Ray3f(Vector3f(5, 5, -5), Vector3f(0, 0, 1));
+    scene.source_ = Ray3f(Vector3f(0.99, 0.99, -0.99), Vector3f(0, 0, 1));
     //scene.source_ = Ray3f(Vector3f(5, 5, -5), Vector3f(0, 0.7, 1));
     //scene.source_ = Ray3f(Vector3f(0, 10.99, 1), Vector3f(0, 0, 0));
 
