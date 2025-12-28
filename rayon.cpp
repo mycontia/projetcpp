@@ -107,12 +107,15 @@ answer Cube::is_hit(Ray3f ray){
     Vector3f depth= prod_vect(width_, height_);
     std::vector<Quad> q;
     std::vector<Vector3f> pt_intersect; // stock si il a intersection entre le rayon et le quadrilatère et si collision contient aussi les coordonnées du point le plus proche, (0,0,0) sinon ainsi que la nomale à la surface où il y a collision
-    q.push_back(Quad(origin_ + depth *0.5f, width_, height_, matter_) ); // devant
-    q.push_back(Quad(origin_ + depth * (-0.5f), width_ * (-1.0f), height_, matter_)); //derrière 
-    q.push_back(Quad(origin_ + width_ * 0.5f, height_, depth, matter_)); // droite 
-    q.push_back(Quad(origin_ + width_ * (-0.5f), height_ * (-1.0f), depth, matter_)); //gauche
-    q.push_back(Quad(origin_ + height_ * 0.5f, width_, depth, matter_)); //haut 
-    q.push_back(Quad(origin_ + height_ *(-0.5f), width_ * (-1.0f), depth, matter_));// bas
+    
+
+
+    q.push_back(Quad(origin_ + depth *0.5f, width_,height_, matter_) ); // devant
+    q.push_back(Quad(origin_ + depth * (-0.5f), height_, width_, matter_)); //derrière #devant sur image correct
+    q.push_back(Quad(origin_ + width_ * 0.5f, depth, height_,matter_)); // droite 
+    q.push_back(Quad(origin_ + width_ * (-0.5f),height_, depth , matter_)); //gauche #gauche sur l'image correct
+    q.push_back(Quad(origin_ + height_ * 0.5f, width_ ,depth, matter_)); //haut 
+    q.push_back(Quad(origin_ + height_ *(-0.5f), depth,width_, matter_));// bas
     // on pourrait se contenter de tester les faces jusqu'à ce qu'une soit en collision avec le rayon mais on veut aussi avoir les coordonnées du point le plus proche donc on va tester pour toutes les faces
     
     answer pt_proche = {false, Vector3f(),Vector3f()};
@@ -163,6 +166,7 @@ float Scene::intensite(answer a) {
     if (a.hit){
         Vector3f v1= a.norm;
         Vector3f v2 =(source_.origin_ - a.pt_inter).normalise();
+        //return 0.2f + 0.8f * max(0.0f, prod_scal(v1, v2));
         return (max(0,prod_scal(v1,v2))); // si le produit scalaire est négatif, alors la lumière est derrière la surface donc l'objet est  noir.
     // v1 et v2 etant normalisés, le produit scalaire entre les deux est donc égal au cosinus de l'angle entre les 2 vecteurs 
     //plu sle cosinus est proche de 1 est plus le point d'intersection ets éclairé 

@@ -49,7 +49,7 @@ int main(void) {
     scene.shapes_.push_back(c);
     scene.shapes_.push_back(s);
     scene.shapes_.push_back(q);
-    scene.source_ = Ray3f(Vector3f(0, 0, -5), Vector3f(0, 0, 1));
+    scene.source_ = Ray3f(Vector3f(5, 5, -5), Vector3f(0, 0, 1));
 
 
     bool running = true;

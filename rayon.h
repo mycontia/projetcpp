@@ -191,6 +191,7 @@ class Quad : public Shape{
         Vector3f origin_; 
         Vector3f width_;
         Vector3f height_;
+
         virtual ~Quad() {};
         Quad(){
             origin_ = Vector3f();
