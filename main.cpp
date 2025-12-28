@@ -23,8 +23,11 @@ int main(void) {
     // avant while 
     //Camera cam(Vector3f(0,0,-100),Vector3f());
 
-    Vector3f h = Vector3f(0, 1, 0.85f);
-    Vector3f w = Vector3f(1, 0, 0);
+    //Vector3f h = Vector3f(0, 0.5, 0.425f);
+    // Vector3f h = Vector3f(0, 0.5, 0.5f);
+    // Vector3f w = Vector3f(0.5, 0.0, 0);
+    Vector3f h = Vector3f(-0.15, 0.5, 0.5f);
+    Vector3f w = Vector3f(0.5, 0.15, 0);
     try{
 
         if (prod_scal(h,w) != 0){
@@ -40,15 +43,50 @@ int main(void) {
     Material bleu(0, 0, 255, 0);
     Material vert(0, 255, 0, 0);
 
-    Cube* c = new Cube(Vector3f(0.8f, 0.5f, 2.0f), h, w, bleu);
-    Sphere* s = new Sphere(Vector3f(-1.5f, 0.0f, 2.0f), 0.5f, rouge);
+    Cube* c = new Cube(Vector3f(0.4f, 0.0f, 0.3f), h, w, bleu);
+    Sphere* s = new Sphere(Vector3f(-0.5f, 0.0f, 1.0f), 0.5f, rouge);
     Quad* q = new Quad(Vector3f(0.5f, -0.5f, 2.0f), Vector3f(0.1f, 0.2f, 0.1f), Vector3f(0.4f, 0.1f, 0.1f), vert);
-
+    Quad* qback = new Quad(
+        Vector3f(0.0f, 0.0f, 2.0f), // Centre du quad
+        Vector3f(0.0f, 2.0f, 0.0f),  // Sa hauteur (Y)
+        Vector3f(2.0f, 0.0f, 0.0f),  // Sa longueur/profondeur (Z)
+        vert
+    );
+    
+    Quad* qleft = new Quad(
+        Vector3f(-1.0f, 0.0f, 1.0f), // Centre du quad
+        Vector3f(0.0f, 2.0f, 0.0f),  // Sa hauteur (Y)
+        Vector3f(0.0f, 0.0f, 2.0f),  // Sa longueur/profondeur (Z)
+        vert
+    );
+    Quad* qright = new Quad(
+        Vector3f(1.0f, 0.0f, 1.0f), // Centre du quad
+        Vector3f(0.0f, 2.0f, 0.0f),  // Sa hauteur (Y)
+        Vector3f(0.0f, 0.0f, 2.0f),  // Sa longueur/profondeur (Z)
+        vert
+    );
+    Quad* qup = new Quad(
+        Vector3f(0.0f, 1.0f, 1.0f), // Centre du quad
+        Vector3f(2.0f, 0.0f, 0.0f),  // Sa largeur (X)
+        Vector3f(0.0f, 0.0f, 2.0f),  // Sa longueur/profondeur (Z)
+        vert
+    );
+    Quad* qdown = new Quad(
+        Vector3f(0.0f, -1.0f, 1.0f), // Centre du quad
+        Vector3f(2.0f, 0.0f, 0.0f),  // Sa largeur (X)
+        Vector3f(0.0f, 0.0f, 2.0f),  // Sa longueur/profondeur (Z)
+        vert
+    );
     Scene scene;
     scene.camera_ = Camera(Vector3f(0, 0, -5), Vector3f(0, 0, 1));
     scene.shapes_.push_back(c);
     scene.shapes_.push_back(s);
     scene.shapes_.push_back(q);
+    scene.shapes_.push_back(qup);
+    scene.shapes_.push_back(qdown);
+    scene.shapes_.push_back(qleft);
+    scene.shapes_.push_back(qright);
+    scene.shapes_.push_back(qback);
     scene.source_ = Ray3f(Vector3f(5, 5, -5), Vector3f(0, 0, 1));
 
 
@@ -71,7 +109,7 @@ int main(void) {
                 //float coord_x = (x - x_taille/2) / 320.0f;
                 //float coord_y = (y - y_taille/2) / 240.0f;
                 float coord_x = (x - x_taille / 2.0f) / (x_taille / 2.0f);
-                float coord_y = (y - y_taille / 2.0f) / (y_taille / 2.0f);
+                float coord_y = -(y - y_taille / 2.0f) / (y_taille / 2.0f);
 
 /*
                 int lignes = 400;
