@@ -196,7 +196,8 @@ Material Material::couleur( Material reflet){
 
 
 
-Material recursive(Ray3f ray, Scene scene, int count) {
+Material recursive(Ray3f ray, 
+    Scene scene, int count) {
     if (count > 7) {
         return Material(0, 0, 0, 0); // si il a trop de rebonds 
     }
@@ -252,4 +253,48 @@ Material recursive(Ray3f ray, Scene scene, int count) {
     return Material(0, 0, 0, 0); 
 }   
             
+void Scene::box(Vector3f centre, float w, float h, float d, Material m){
+
+    Vector3f x(1,0,0);
+    Vector3f y(0,1,0);
+    Vector3f z(0,0,1);
+
+    Quad* qback = new Quad(
+        centre + z * (d * 0.5f), // Centre du quad
+        x*w,
+        y*h,  // on fait cette ordre pour orienter le vecteur normal vers l'intérieur de la boite 
+        m
+    );
+    
+    Quad* qleft = new Quad(
+        centre + x *(- w * 0.5f), 
+        y*h,
+        z*d,  
+        m
+    );
+
+    Quad* qright = new Quad(
+        centre + x *(w * 0.5f), 
+        z*d, //inversion des coordonnées par rapport à qleft pour orienter le vecteur normal vers l'extérieur de la boite 
+        y*h, 
+        m
+    );
+    Quad* qup = new Quad(
+        centre + y * (h * 0.5f), 
+        x*w,
+        z*d,
+        m
+    );
+    Quad* qdown = new Quad(
+        centre + y * (- h * 0.5f), 
+        z*d,
+        x*w,
+        m
+    );
+    shapes_.push_back(qup);
+    shapes_.push_back(qdown);
+    shapes_.push_back(qleft);
+    shapes_.push_back(qright);
+    shapes_.push_back(qback);
+}
 

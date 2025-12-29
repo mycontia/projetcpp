@@ -240,6 +240,7 @@ class Scene {
         Camera camera_; 
         std::vector<Shape*> shapes_;
         Ray3f source_;
+        void box(Vector3f centre, float w, float h, float d, Material m);
         float intensite(answer a);
         void render(int width, int height, std::string filename);
 
