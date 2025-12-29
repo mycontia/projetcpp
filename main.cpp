@@ -78,11 +78,11 @@ int main(void) {
         vert
     );
     Scene scene;
-    scene.camera_ = Camera(Vector3f(0, 0, -5), Vector3f(0, 0, 1));
+    scene.camera_ = Camera(Vector3f(0.4, 0, -5), Vector3f(0, 0, 1));
     scene.shapes_.push_back(c);
     scene.shapes_.push_back(s);
     scene.shapes_.push_back(q);
-    //scene.shapes_.push_back(qup);
+    scene.shapes_.push_back(qup);
     scene.shapes_.push_back(qdown);
     scene.shapes_.push_back(qleft);
     scene.shapes_.push_back(qright);
