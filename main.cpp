@@ -60,8 +60,8 @@ int main(void) {
         return -1;
     }
 
-    Material rouge(255, 0, 0, 0);
-    Material bleu(0, 0, 255, 0);
+    Material rouge(255, 0, 0, 0.4f);
+    Material bleu(0, 0, 255, 0.5f);
     Material vert(0, 255, 0, 0);
 
     Cube* c = new Cube(Vector3f(-0.4f, 0.0f, 0.3f), h, w, bleu);
@@ -144,7 +144,7 @@ int main(void) {
                 Ray3f ray(scene.camera_.position_, direction);
                 // par défaut on met en noir
                 SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-                //JONATHAN 
+
                 float dist_min = INFINITY;
                 Shape* shape_proche = nullptr; 
                 answer pt_proche;
@@ -190,10 +190,12 @@ int main(void) {
                     
                     if (estDansLombre) {
                         // intensité faible 
-                        draw_color(renderer, shape_proche->matter_, 0.05f);
+                        draw_color(renderer, shape_proche->matter_, 0.3f);
                     } else {
-                        // calcul de Laura
-                        draw_color(renderer, shape_proche->matter_, scene.intensite(pt_proche));
+                        Vector3f direction = (Vector3f(coord_x, coord_y, -2.0f) - scene.camera_.position_).normalise();
+                        Ray3f ray_init(scene.camera_.position_, direction);
+                        Material c = recursive(ray_init, scene, 0);
+                        SDL_SetRenderDrawColor(renderer,c.r_, c.g_, c.b_, 255);
                     }
                     
                 }

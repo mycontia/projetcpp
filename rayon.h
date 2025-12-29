@@ -132,7 +132,8 @@ class Material {
         float g_;
         float b_; 
         float shininess_;
-
+        Material couleur(Material reflet);
+        
         Material(){
             r_ = 0;
             g_ = 0;
@@ -154,7 +155,7 @@ class Shape {
 
         virtual answer is_hit(Ray3f ray) =0 ;  // & ? pas grosse struct 
         // renvoie un couple indiquant s'il y a intersection et si oui renvoie le point le plus proche sinon renvoie 0
-        virtual Ray3f reflect(Ray3f ray)=0;
+        Ray3f reflect(Ray3f r, answer a);
 };
 
 
@@ -182,7 +183,7 @@ class Cube : public Shape{
 
 
         answer is_hit(Ray3f ray);
-        Ray3f reflect(Ray3f ray);
+
 
 };
 
@@ -209,7 +210,6 @@ class Quad : public Shape{
 
 
         answer is_hit(Ray3f ray);
-        Ray3f reflect(Ray3f ray);
         bool est_dans_surf(Vector3f v);
 
 };
@@ -231,7 +231,7 @@ class Sphere : public Shape{
             matter_ = m;
         }
         answer is_hit(Ray3f ray);
-        Ray3f reflect(Ray3f ray);
+
 };
 
 
@@ -247,5 +247,5 @@ class Scene {
 };
 
 void draw_color(SDL_Renderer* rend, Material col, float intens);
-
+Material recursive(Ray3f ray, Scene scene, int count);
 #endif

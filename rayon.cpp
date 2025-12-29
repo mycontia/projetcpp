@@ -53,9 +53,7 @@ answer Quad::is_hit(Ray3f ray){
  
 }
 
-// Pour reflect, renvoie juste le rayon d'origine pour que ça compile
-Ray3f Sphere::reflect(Ray3f ray) { return ray; }
-Ray3f Quad::reflect(Ray3f ray) { return ray; }
+
 
 // partie Laura
 
@@ -160,9 +158,6 @@ float max(float a, float b){
     return a;
 }
 
-Ray3f Cube::reflect(Ray3f ray) {
-    return ray; 
-}
 
 float Scene::intensite(answer a) {
     if (a.hit){
@@ -183,3 +178,78 @@ void draw_color(SDL_Renderer* rend, Material col, float intens){
     // Rouge Vert Bleu et transparence
     SDL_SetRenderDrawColor(rend, col.r_ * intens , col.g_ * intens, col.b_ *intens, 255);
 }
+
+// Pour reflect, renvoie juste le rayon d'origine pour que ça compile
+Ray3f Shape::reflect(Ray3f r, answer a) { 
+    Ray3f reflet = Ray3f();
+    if(a.hit && (matter_.shininess_ !=0)){
+        Vector3f direction_reflet = (r.direction_ +  a.norm * ((- 2) * prod_scal(r.direction_ , a.norm))).normalise();
+        reflet = Ray3f(a.pt_inter + a.norm * 0.001f, direction_reflet); // si avec les arrondis de calculs on a un pt_iter qui est légèrement décalé et à l'interieure de la surface, la réflection va donc avoir lieu sur le meme solide donc on décale un peu le point d'intersection en cas d'erreurs de calculs sur les floats 
+    }
+    return reflet;
+    }
+
+Material Material::couleur( Material reflet){
+    return Material((r_ * (1- shininess_) + reflet.r_*shininess_), (g_ * (1- shininess_) + reflet.g_*shininess_),(b_ * (1- shininess_) + reflet.b_*shininess_),0);
+
+}
+
+
+
+Material recursive(Ray3f ray, Scene scene, int count) {
+    if (count > 7) {
+        return Material(0, 0, 0, 0); // si il a trop de rebonds 
+    }
+    // ça ça va changer, c'est à dire que le rayon va être projeté de la caméra ves le pixel.
+    // donc l'origine sera bien (x,y,-50) par exemple
+    // comme ça on ne change pas l'endroit 
+    //bon en fait là je place la caméra en origine x y -10
+    //bref c'est le 2.a ici
+    
+
+    // je veux en x en y et en z en fonction de sphere
+
+    
+    //SDL_RenderClear(renderer); //JONATHAN 
+    float dist_min = INFINITY;
+    Shape* shape_proche = nullptr; 
+    answer pt_proche;
+    // si un rayon traverse une forme puis une autre à la sortie de la première on ne veut voir que la première touchée par le rayon, celle cachée ne devant pas apparaitre sur la fenetre 
+    
+    for (size_t i =0; i< scene.shapes_.size(); i++){
+        answer rep = scene.shapes_[i]->is_hit(ray);
+        if (rep.hit) {
+            float dist = (rep.pt_inter - ray.origin_).norme();
+            if (dist < dist_min && dist > 0.05f) {
+                dist_min = dist;
+                shape_proche = scene.shapes_[i];
+                pt_proche = rep;
+            }
+        }
+    }
+    if (shape_proche != nullptr) {
+
+        /////////////////////////////////////////////// A CHECKER 
+        
+         // On calcule la couleur de base avec l'intensité lumineuse
+        float intens = scene.intensite(pt_proche);
+        float shininess = shape_proche->matter_.shininess_ ;
+        Material couleur_obj(shape_proche->matter_.r_ * intens, shape_proche->matter_.g_ * intens, shape_proche->matter_.b_ * intens, shininess);
+
+        if(shininess != 0){ //il y a un rayon réfléchi
+            Ray3f rayon_reflet = shape_proche->reflect(ray, pt_proche);
+            
+            Material couleur_reflet = recursive(rayon_reflet, scene, count +1);
+            
+            // On mélange la couleur de l'objet et celle du reflet
+            return couleur_obj.couleur(couleur_reflet);
+        }
+
+        return couleur_obj;
+    }
+
+    // 4. Si on ne touche rien (le vide/ciel)
+    return Material(0, 0, 0, 0); 
+}   
+            
+
