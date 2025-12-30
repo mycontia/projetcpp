@@ -109,13 +109,13 @@ answer Cube::is_hit(Ray3f ray){
     std::vector<Vector3f> pt_intersect; // stock si il a intersection entre le rayon et le quadrilatère et si collision contient aussi les coordonnées du point le plus proche, (0,0,0) sinon ainsi que la nomale à la surface où il y a collision
     
 
-
-    q.push_back(Quad(origin_ + depth *0.5f, width_,height_, matter_) ); // devant
-    q.push_back(Quad(origin_ + depth * (-0.5f), height_, width_, matter_)); //derrière #devant sur image correct
-    q.push_back(Quad(origin_ + width_ * 0.5f, depth, height_,matter_)); // droite 
-    q.push_back(Quad(origin_ + width_ * (-0.5f),height_, depth , matter_)); //gauche #gauche sur l'image correct
-    q.push_back(Quad(origin_ + height_ * 0.5f, width_ ,depth, matter_)); //haut 
-    q.push_back(Quad(origin_ + height_ *(-0.5f), depth,width_, matter_));// bas
+    
+    q.push_back(Quad(origin_ + depth *(-0.5f),height_, width_, matter_) ); // devant
+    q.push_back(Quad(origin_ + depth * 0.5f, width_,height_,  matter_)); //derrière #devant sur image correct
+    q.push_back(Quad(origin_ + width_ * 0.5f, height_,depth, matter_)); // droite 
+    q.push_back(Quad(origin_ + width_ * (-0.5f),depth ,height_,  matter_)); //gauche #gauche sur l'image correct
+    q.push_back(Quad(origin_ + height_ * (-0.5f), width_ ,depth, matter_)); //haut 
+    q.push_back(Quad(origin_ + height_ *0.5f, depth,width_, matter_));// bas
     // on pourrait se contenter de tester les faces jusqu'à ce qu'une soit en collision avec le rayon mais on veut aussi avoir les coordonnées du point le plus proche donc on va tester pour toutes les faces
     
     answer pt_proche = {false, Vector3f(),Vector3f()};
@@ -163,9 +163,8 @@ float Scene::intensite(answer a) {
     if (a.hit){
         Vector3f v1= a.norm;
         Vector3f v2 =(source_.origin_ - a.pt_inter).normalise();
-        float ambiant = 0.2f;
         //return 0.2f + 0.8f * max(0.0f, prod_scal(v1, v2));
-        return (ambiant + 0.8f * max(0,prod_scal(v1,v2))); // si le produit scalaire est négatif, alors la lumière est derrière la surface donc l'objet est  noir.
+        return (max(0,prod_scal(v1,v2))); // si le produit scalaire est négatif, alors la lumière est derrière la surface donc l'objet est  noir.
     // v1 et v2 etant normalisés, le produit scalaire entre les deux est donc égal au cosinus de l'angle entre les 2 vecteurs 
     //plu sle cosinus est proche de 1 est plus le point d'intersection ets éclairé 
     }
@@ -185,7 +184,7 @@ Ray3f Shape::reflect(Ray3f r, answer a) {
     if(a.hit && (matter_.shininess_ !=0)){
         Vector3f direction_reflet = (r.direction_ +  a.norm * ((- 2) * prod_scal(r.direction_ , a.norm))).normalise();
         reflet = Ray3f(a.pt_inter + a.norm * 0.001f, direction_reflet); // si avec les arrondis de calculs on a un pt_iter qui est légèrement décalé et à l'interieure de la surface, la réflection va donc avoir lieu sur le meme solide donc on décale un peu le point d'intersection en cas d'erreurs de calculs sur les floats 
-    }
+    }  // + a.norm * 0.001f n'enlève pas les petits points 
     return reflet;
     }
 
@@ -221,7 +220,7 @@ Material recursive(Ray3f ray,
         answer rep = scene.shapes_[i]->is_hit(ray);
         if (rep.hit) {
             float dist = (rep.pt_inter - ray.origin_).norme();
-            if (dist < dist_min && dist > 0.05f) {
+            if (dist < dist_min && dist> 0.01f) { // pas obligé le >
                 dist_min = dist;
                 shape_proche = scene.shapes_[i];
                 pt_proche = rep;
@@ -261,8 +260,8 @@ void Scene::box(Vector3f centre, float w, float h, float d, Material m){
 
     Quad* qback = new Quad(
         centre + z * (d * 0.5f), // Centre du quad
-        x*w,
-        y*h,  // on fait cette ordre pour orienter le vecteur normal vers l'intérieur de la boite 
+        y*h,
+        x*w,// on fait cette ordre pour orienter le vecteur normal vers l'intérieur de la boite 
         m
     );
     
@@ -281,14 +280,14 @@ void Scene::box(Vector3f centre, float w, float h, float d, Material m){
     );
     Quad* qup = new Quad(
         centre + y * (h * 0.5f), 
-        x*w,
         z*d,
+        x*w,
         m
     );
     Quad* qdown = new Quad(
-        centre + y * (- h * 0.5f), 
-        z*d,
+        centre + y * (- h * 0.5f),
         x*w,
+        z*d,
         m
     );
     shapes_.push_back(qup);
