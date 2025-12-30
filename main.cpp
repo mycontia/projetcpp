@@ -132,97 +132,132 @@ int main(void) {
     //scene.source_ = Ray3f(Vector3f(0, 10.99, 1), Vector3f(0, 0, 0));
 
     bool running = true;
+    bool image_finale = false;
     while (running) {
         SDL_Event e;
         //tant qu'il y a un evenement dans la fenetre sdl
         while (SDL_PollEvent(&e) != 0) {
             // si jamais il se passe un truc de type quit c est à dire la croix et bien on quitte
             if (e.type == SDL_QUIT) running = false;
-        }
-        
-        // double boucle
-        for (int y = 0; y < y_taille; y++) {
-            for (int x = 0; x < x_taille; x++) {
-                
-                // On transforme x et y (0 à 640) en coordonnées centrées (-1.0 à 1.0)
-                // pour que le centre de l'écran soit (0,0)
-                
-                float coord_x = (x - x_taille / 2.0f) / (x_taille / 2.0f);
-                float coord_y = (y - y_taille / 2.0f) / (y_taille / 2.0f);
-
-                       
-
-                // Création du rayon : 
-                // La direction est : PointSurEcran - PositionCaméra
-                
-                Vector3f direction = (Vector3f(coord_x, coord_y, -2.0f) - scene.camera_.position_).normalise();
-                Ray3f ray(scene.camera_.position_, direction);
-                // par défaut on met en noir
+            // if (e.type == SDL_KEYDOWN) {
+            //     float vitesse = 0.7f;
+            //     switch (e.key.keysym.sym) {
+            //         case SDLK_UP:    scene.camera_.position_.y_ += vitesse; break;
+            //         case SDLK_DOWN:  scene.camera_.position_.y_ -= vitesse; break;
+            //         case SDLK_LEFT:  scene.camera_.position_.x_ -= vitesse; break;
+            //         case SDLK_RIGHT: scene.camera_.position_.x_ += vitesse; break;
+            //     }
+            //     image_finale = false; //  recalcule image
+            //     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+            //     SDL_RenderClear(renderer); // Efface l'ancienne image
+            // }
+            if (e.type == SDL_KEYDOWN) {
+                float vitesse = 0.5f;
+                switch (e.key.keysym.sym) {
+                    // Déplacement de la LUMIÈRE (Source)
+                    case SDLK_z: scene.source_.origin_.y_ -= vitesse; break; // Monte (Y diminue)
+                    case SDLK_s: scene.source_.origin_.y_ += vitesse; break; // Descend (Y augmente)
+                    case SDLK_q: scene.source_.origin_.x_ -= vitesse; break; // Gauche (X diminue)
+                    case SDLK_d: scene.source_.origin_.x_ += vitesse; break; // Droite (X augmente)
+                    case SDLK_e: scene.source_.origin_.z_ += vitesse; break; // Fond (Z augmente)
+                    case SDLK_w: scene.source_.origin_.z_ -= vitesse; break; // Vers nous (Z diminue)
+                    
+                    // Conservation des flèches pour la CAMÉRA
+                    case SDLK_UP:    scene.camera_.position_.y_ += vitesse; break; 
+                    case SDLK_DOWN:  scene.camera_.position_.y_ -= vitesse; break;
+                    case SDLK_LEFT:  scene.camera_.position_.x_ += vitesse; break;
+                    case SDLK_RIGHT: scene.camera_.position_.x_ -= vitesse; break;
+                }
+                image_finale = false; 
                 SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-
-                float dist_min = INFINITY;
-                Shape* shape_proche = nullptr; 
-                answer pt_proche;
-
-                for (size_t i =0; i< scene.shapes_.size(); i++){
-                    answer rep = scene.shapes_[i]->is_hit(ray);
-                    if (rep.hit) {
-                        float dist = (rep.pt_inter - scene.camera_.position_).norme();
-                        if (dist < dist_min) {
-                            dist_min = dist;
-                            shape_proche = scene.shapes_[i];
-                            pt_proche = rep;
-                        }
-                    }
-                }
-                
-                if (shape_proche != nullptr) {
-                    // rayon d'ombre
-                    Vector3f versLumiere = (scene.source_.origin_ - pt_proche.pt_inter).normalise();
-                    //distance de mon objet à la source de lumière
-                    float distSource = (scene.source_.origin_ - pt_proche.pt_inter).norme();
-                    
-                    // je rajoute un bout du vect norm pour éviter d'être hit par moi-même
-                    Ray3f rayOmbre(pt_proche.pt_inter + (pt_proche.norm * 0.001f), versLumiere);
-                    
-                    bool estDansLombre = false;
-
-                    // est ce que je hit un autre objet avant la lumière 
-                    for (size_t j = 0; j < scene.shapes_.size(); j++) {
-                        answer hitOmbre = scene.shapes_[j]->is_hit(rayOmbre);
-                        //distance d'un obstacle à la source de lumière
-                        float distObstacle = (scene.source_.origin_ - hitOmbre.pt_inter).norme();
-                        if (hitOmbre.hit) {
-                            if (distObstacle > 0.001f && distObstacle < distSource ) {
-                                estDansLombre = true;
-                                break; 
-                            }
-                            
-                            
-                        }
-                    }
-
-                    
-                    if (estDansLombre) {
-                        // intensité faible 
-                        draw_color(renderer, shape_proche->matter_, 0.3f);
-                    } else {
-                        Vector3f direction = (Vector3f(coord_x, coord_y, -2.0f) - scene.camera_.position_).normalise();
-                        Ray3f ray_init(scene.camera_.position_, direction);
-                        Material c = recursive(ray_init, scene, 0);
-                        SDL_SetRenderDrawColor(renderer,c.r_, c.g_, c.b_, 255);
-                    }
-                    
-                }
-                
-                // je veux que le pinceau se pose en x y
-                SDL_RenderDrawPoint(renderer, x, y);
-                
+                SDL_RenderClear(renderer); 
             }
         }
-        // montrer le dessin ( il était caché pour les calculs)
-        SDL_RenderPresent(renderer); 
         
+        if (!image_finale){
+            // double boucle
+            for (int y = 0; y < y_taille; y++) {
+                for (int x = 0; x < x_taille; x++) {
+                    
+                    // On transforme x et y (0 à 640) en coordonnées centrées (-1.0 à 1.0)
+                    // pour que le centre de l'écran soit (0,0)
+                    
+                    float coord_x = (x - x_taille / 2.0f) / (x_taille / 2.0f);
+                    float coord_y = (y - y_taille / 2.0f) / (y_taille / 2.0f);
+
+                        
+
+                    // Création du rayon : 
+                    // La direction est : PointSurEcran - PositionCaméra
+                    
+                    Vector3f direction = (Vector3f(coord_x, coord_y, -2.0f) - scene.camera_.position_).normalise();
+                    Ray3f ray(scene.camera_.position_, direction);
+                    // par défaut on met en noir
+                    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+
+                    float dist_min = INFINITY;
+                    Shape* shape_proche = nullptr; 
+                    answer pt_proche;
+
+                    for (size_t i =0; i< scene.shapes_.size(); i++){
+                        answer rep = scene.shapes_[i]->is_hit(ray);
+                        if (rep.hit) {
+                            float dist = (rep.pt_inter - scene.camera_.position_).norme();
+                            if (dist < dist_min) {
+                                dist_min = dist;
+                                shape_proche = scene.shapes_[i];
+                                pt_proche = rep;
+                            }
+                        }
+                    }
+                    
+                    if (shape_proche != nullptr) {
+                        // rayon d'ombre
+                        Vector3f versLumiere = (scene.source_.origin_ - pt_proche.pt_inter).normalise();
+                        //distance de mon objet à la source de lumière
+                        float distSource = (scene.source_.origin_ - pt_proche.pt_inter).norme();
+                        
+                        // je rajoute un bout du vect norm pour éviter d'être hit par moi-même
+                        Ray3f rayOmbre(pt_proche.pt_inter + (pt_proche.norm * 0.001f), versLumiere);
+                        
+                        bool estDansLombre = false;
+
+                        // est ce que je hit un autre objet avant la lumière 
+                        for (size_t j = 0; j < scene.shapes_.size(); j++) {
+                            answer hitOmbre = scene.shapes_[j]->is_hit(rayOmbre);
+                            //distance d'un obstacle à la source de lumière
+                            float distObstacle = (scene.source_.origin_ - hitOmbre.pt_inter).norme();
+                            if (hitOmbre.hit) {
+                                if (distObstacle > 0.001f && distObstacle < distSource ) {
+                                    estDansLombre = true;
+                                    break; 
+                                }
+                                
+                                
+                            }
+                        }
+
+                        
+                        if (estDansLombre) {
+                            // intensité faible 
+                            draw_color(renderer, shape_proche->matter_, 0.3f);
+                        } else {
+                            Vector3f direction = (Vector3f(coord_x, coord_y, -2.0f) - scene.camera_.position_).normalise();
+                            Ray3f ray_init(scene.camera_.position_, direction);
+                            Material c = recursive(ray_init, scene, 0);
+                            SDL_SetRenderDrawColor(renderer,c.r_, c.g_, c.b_, 255);
+                        }
+                        
+                    }
+                    
+                    // je veux que le pinceau se pose en x y
+                    SDL_RenderDrawPoint(renderer, x, y);
+                    
+                }
+            }
+            // montrer le dessin ( il était caché pour les calculs)
+            SDL_RenderPresent(renderer); 
+        }
 
     }
 
