@@ -160,7 +160,7 @@ int main(void) {
     scene.shapes_.push_back(qback);
 
 */  
-    scene.source_ = Ray3f(Vector3f(0.4, -0.5f, -5), Vector3f(0, 1, 0));
+    scene.source_ = Ray3f(Vector3f(1.4, -1.0f, -5), Vector3f(0, 1, 0));
     //scene.source_ = Ray3f(Vector3f(0.4, -0.5f, -5), Vector3f(0, 0, 1));
 
 
