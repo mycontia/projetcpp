@@ -6,6 +6,11 @@
 #include <vector>
 #include <SDL2/SDL.h>
 
+/**
+ * @class Vector3f
+ * @brief Classe pour gérer les vecteurs en 3D
+ * * Contient les coordonées x, y, z et les opérations de base
+ */
 class Vector3f {
     public :
         float x_; 
@@ -21,23 +26,23 @@ class Vector3f {
             y_ = y;
             z_ = z;   
         }
-        Vector3f operator+ (Vector3f v1) const {  // const car on ne veut pas modifier le vecteur; & ? vect3f n'est pas une grosse struct 
+        Vector3f operator+ (Vector3f v1) const {  // const car on ne veut pas modifier le vecteur
             Vector3f v;
-            v.x_ =  x_ + v1.x_;  //ATENTION A L'ORDRE
+            v.x_ =  x_ + v1.x_;  
             v.y_ = y_ + v1.y_;
             v.z_ =  z_ + v1.z_;
             return v;
         }
-        Vector3f operator- (Vector3f v1) const {  // const car on ne veut pas modifier le vecteur; & ? vect3f n'est pas une grosse struct 
+        Vector3f operator- (Vector3f v1) const {  
             Vector3f v;
-            v.x_ =  x_ - v1.x_;  //ATENTION A L'ORDRE
+            v.x_ =  x_ - v1.x_;  
             v.y_ = y_ - v1.y_;
             v.z_ =  z_ - v1.z_;
             return v;
         }
 
 
-        Vector3f operator* (float a) const {  // const car on ne veut pas modifier le vecteur; & ? vect3f n'est pas une grosse struct 
+        Vector3f operator* (float a) const {  
             Vector3f v;
             v.x_ = a * x_;
             v.y_ = a * y_;
@@ -45,9 +50,9 @@ class Vector3f {
             return v;
         }
 
-        Vector3f operator* (Vector3f v1) const {  // const car on ne veut pas modifier le vecteur; & ? vect3f n'est pas une grosse struct 
+        Vector3f operator* (Vector3f v1) const {  
             Vector3f v;
-            v.x_ = v1.x_ * x_;  // multiplaction commutative 
+            v.x_ = v1.x_ * x_;  
             v.y_ = v1.y_ * y_;
             v.z_ = v1.z_ * z_;
             return v;
@@ -62,14 +67,21 @@ class Vector3f {
 
         }
 
-        float norme () const{  //normalisation 
+        /**
+         * @brief calcul la norme du vecteur
+         * @return la longeur du vecteur
+         */
+        float norme () const{  
             float n;
             n = std::sqrt(x_ * x_ + y_ * y_ + z_ * z_);
             return n; 
 
         }
 
-        Vector3f normalise() const{ //normalise un vecteur 
+        /**
+         * @brief transforme le vecteur en un vcteur de norme 1
+         */
+        Vector3f normalise() const{ 
             float n = norme();
             Vector3f v = Vector3f(0, 0, 0);
             if (n>0){
@@ -82,12 +94,17 @@ class Vector3f {
         }
 };
 
+/**
+ * @struct answer
+ * @brief stock les infos sur l'intersection 
+ */
 struct answer {
-    bool hit;
-    Vector3f pt_inter;
-    Vector3f norm;
+    bool hit;  ///<  vrai si ca touche
+    Vector3f pt_inter; ///< point d'impact
+    Vector3f norm; ///< normale à la surface
 };
 
+//  Prototypes des fonctions outils
 float prod_scal (Vector3f v1, Vector3f v2);
 Vector3f prod_vect(Vector3f v1, Vector3f v2);
 Vector3f direction (Vector3f v, Vector3f w);
@@ -95,7 +112,10 @@ bool egal (Vector3f v1, Vector3f v2);
 float max(float a, float b);
 
 
-
+/**
+ * @class Ray3f
+ * @brief represente un rayon lumineux
+ */
 class Ray3f {
     public: 
         Vector3f origin_; 
@@ -110,6 +130,10 @@ class Ray3f {
         }
 };
 
+/**
+ * @class Camera
+ * @brief gere le point de vue de l'utilisateur
+ */
 class Camera {
     public: 
         Vector3f position_; 
@@ -126,6 +150,10 @@ class Camera {
 
 };
 
+/**
+ * @class Material
+ * @brief contient les propriétés de couleur et de brillance
+ */
 class Material {
     public: 
         float r_;
@@ -149,23 +177,38 @@ class Material {
 
 };
 
+/**
+ * @class Shape
+ * @brief classe mère abstraite pour tous les objets de la scene
+ */
 class Shape {
     public: 
         Material matter_; 
 
-        virtual answer is_hit(Ray3f ray) =0 ;  // & ? pas grosse struct 
-        // renvoie un couple indiquant s'il y a intersection et si oui renvoie le point le plus proche sinon renvoie 0
+        /**
+         * @brief determine si le rayon touche l'objet
+         * @param ray le rayon envoyé
+         * @return une structure answer avec les détailles
+         */
+        virtual answer is_hit(Ray3f ray) =0 ;  
+        
+        /**
+         * @brief calcul le rayon de reflexion
+         */
         Ray3f reflect(Ray3f r, answer a);
 };
 
 
 
-
+/**
+ * @class Cube
+ * @brief forme de type cube ou pavé
+ */
 class Cube : public Shape{
     public: 
         Vector3f origin_; 
         Vector3f height_;
-        Vector3f width_; // pour faire des paralélépipèdes
+        Vector3f width_; 
         Cube(){
             origin_ = Vector3f();
             height_ = Vector3f();
@@ -180,13 +223,13 @@ class Cube : public Shape{
             matter_ = m;
         }
 
-
-
         answer is_hit(Ray3f ray);
-
-
 };
 
+/**
+ * @class Quad
+ * @brief un simple quadrilatère dans l'espace
+ */
 class Quad : public Shape{
     public: 
         Vector3f origin_; 
@@ -210,10 +253,16 @@ class Quad : public Shape{
 
 
         answer is_hit(Ray3f ray);
+        
+        /** @brief check si le point est dans les limites du quad */
         bool est_dans_surf(Vector3f v);
 
 };
 
+/**
+ * @class Sphere
+ * @brief objet de type sphere
+ */
 class Sphere : public Shape{
     public: 
         Vector3f origin_; 
@@ -234,19 +283,31 @@ class Sphere : public Shape{
 
 };
 
-
+/**
+ * @class Scene
+ * @brief contient tous les objets et la lumiere
+ */
 class Scene {
     public: 
         Camera camera_; 
         std::vector<Shape*> shapes_;
         Ray3f source_;
+        
+        /** @brief crée une boite de type cornell box */
         void box(Vector3f centre, float w, float h, float d, Material m);
+        
+        /** @brief calcul l'intensité lumineuse au point d'impact */
         float intensite(answer a);
+        
         void render(int width, int height, std::string filename);
-
-
 };
 
+// Fonctions de rendu globales
 void draw_color(SDL_Renderer* rend, Material col, float intens);
+
+/**
+ * @brief fonction recursive pour les reflets
+ * @param count nombre de rebonds maximums
+ */
 Material recursive(Ray3f ray, Scene scene, int count);
 #endif
