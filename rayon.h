@@ -188,7 +188,8 @@ class Shape {
         /**
          * @brief determine si le rayon touche l'objet
          * @param ray le rayon envoyé
-         * @return une structure answer avec les détailles
+         * @return une structure answer avec les détails 
+         * renvoie un couple indiquant s'il y a intersection et si oui renvoie le point le plus proche sinon renvoie 0
          */
         virtual answer is_hit(Ray3f ray) =0 ;  
         
