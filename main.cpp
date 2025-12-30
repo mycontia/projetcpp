@@ -67,13 +67,15 @@ int main(void) {
 
     Cube* c = new Cube(Vector3f(0.1f, 0.0f, 1.0f), h, w, bleu);
     Sphere* s = new Sphere(Vector3f(-0.8f, 0.0f, 0.3f), 0.5f, rouge);
-    Quad* q = new Quad(Vector3f(0.6f, -0.1f, -1.0f), Vector3f(0.1f, 0.2f, 0.1f), Vector3f(0.4f, 0.1f, 0.1f), jaune);
+    //Quad* q = new Quad(Vector3f(0.6f, -0.1f, -1.0f), Vector3f(0.1f, 0.2f, 0.1f), Vector3f(0.4f, 0.1f, 0.1f), jaune);
+    Quad* q = new Quad(Vector3f(0.6f, -0.1f, 0.3f), Vector3f(0.1f, 0.2f, 0.1f), Vector3f(0.4f, 0.1f, 0.1f), jaune);
     
     //if (camera_.position_ && source_.origin  not in box){}
     //throw 
 
     Scene scene;
-    scene.box(Vector3f(-0.45f,0.0f,2.5f), 4.0f, 2.0f, 2.0f, vert);
+    //scene.box(Vector3f(-0.45f,0.0f,2.5f), 4.0f, 2.0f, 2.0f, vert);
+    scene.box(Vector3f(-0.45f,0.0f,1.5f), 4.0f, 2.0f, 2.0f, vert);
 
 /*
 
@@ -215,21 +217,21 @@ int main(void) {
                         // rayon d'ombre
                         Vector3f versLumiere = (scene.source_.origin_ - pt_proche.pt_inter).normalise();
                         //distance de mon objet à la source de lumière
-                        float distSource = (scene.source_.origin_ - pt_proche.pt_inter).norme();
+                        float distlum = (scene.source_.origin_ - pt_proche.pt_inter).norme();
                         
                         // je rajoute un bout du vect norm pour éviter d'être hit par moi-même
                         Ray3f rayOmbre(pt_proche.pt_inter + (pt_proche.norm * 0.001f), versLumiere);
                         
-                        bool estDansLombre = false;
+                        bool testombre = false;
 
                         // est ce que je hit un autre objet avant la lumière 
                         for (size_t j = 0; j < scene.shapes_.size(); j++) {
                             answer hitOmbre = scene.shapes_[j]->is_hit(rayOmbre);
                             //distance d'un obstacle à la source de lumière
-                            float distObstacle = (scene.source_.origin_ - hitOmbre.pt_inter).norme();
+                            float distobst = (scene.source_.origin_ - hitOmbre.pt_inter).norme();
                             if (hitOmbre.hit) {
-                                if (distObstacle > 0.001f && distObstacle < distSource ) {
-                                    estDansLombre = true;
+                                if (distobst > 0.001f && distobst < distlum ) {
+                                    testombre = true;
                                     break; 
                                 }
                                 
@@ -238,7 +240,7 @@ int main(void) {
                         }
 
                         
-                        if (estDansLombre) {
+                        if (testombre) {
                             // intensité faible 
                             draw_color(renderer, shape_proche->matter_, 0.3f);
                         } else {
