@@ -197,6 +197,7 @@ class Shape {
          * @brief calcul le rayon de reflexion
          */
         Ray3f reflect(Ray3f r, answer a);
+        virtual ~Shape() {} // éviter fuite memoire quand free
 };
 
 

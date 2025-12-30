@@ -162,7 +162,8 @@ float max(float a, float b){
 float Scene::intensite(answer a) {
     if (a.hit){
         Vector3f v1= a.norm;
-        Vector3f v2 =(source_.origin_ - a.pt_inter).normalise();
+        // Vector3f v2 =(source_.origin_ - a.pt_inter).normalise();
+        Vector3f v2 =((source_.direction_ - source_.origin_) - a.pt_inter).normalise();
         //return 0.2f + 0.8f * max(0.0f, prod_scal(v1, v2));
         return (max(0,prod_scal(v1,v2))); // si le produit scalaire est négatif, alors la lumière est derrière la surface donc l'objet est  noir.
     // v1 et v2 etant normalisés, le produit scalaire entre les deux est donc égal au cosinus de l'angle entre les 2 vecteurs 

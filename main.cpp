@@ -14,6 +14,37 @@
 #include <iostream>
 #include "rayon.h"
 
+
+/** * @brief capture l'ecran actuel et le sauve en .bmp
+ * @param rend le pinceau SDL
+ * @param x largeur de la fenetre
+ * @param y hauteur
+ */
+void sauvegarder_image(SDL_Renderer* rend, int x, int y) {
+    // on crée une surface temporaire en RAM
+    SDL_Surface* surface = SDL_CreateRGBSurface(0, x, y, 32, 0, 0, 0, 0);
+    
+    if (surface == nullptr) {
+        std::cout << "Erreur surface : " << SDL_GetError() << "\n";
+        return;
+    }
+
+    // on lit les pixels du GPU vers notre surface
+    // attention au format ARGB8888 souvent utilisé par SDL2
+    SDL_RenderReadPixels(rend, NULL, SDL_PIXELFORMAT_ARGB8888, surface->pixels, surface->pitch);
+
+    // ecriture du fichier (on met .bmp car c'est natif a SDL)
+    if (SDL_SaveBMP(surface, "scene.bmp") != 0) {
+        std::cout << "Echec de la sauvegarde... : " << SDL_GetError() << "\n";
+    } else {
+        std::cout << "Image enregistrée avec succes dans scene.bmp !\n";
+    }
+
+    
+    SDL_FreeSurface(surface);
+}
+
+
 /** 
  * @brief fonction main
  * @return 0 si succès -1 si erreur
@@ -128,8 +159,11 @@ int main(void) {
     scene.shapes_.push_back(qright);
     scene.shapes_.push_back(qback);
 
-*/    
-    scene.source_ = Ray3f(Vector3f(0.4, -0.5f, -5), Vector3f(0, 0, 1));
+*/  
+    scene.source_ = Ray3f(Vector3f(0.4, -0.5f, -5), Vector3f(0, 1, 0));
+    //scene.source_ = Ray3f(Vector3f(0.4, -0.5f, -5), Vector3f(0, 0, 1));
+
+
     //scene.source_ = Ray3f(Vector3f(5, 5, -5), Vector3f(0, 0.7, 1));
     //scene.source_ = Ray3f(Vector3f(0, 10.99, 1), Vector3f(0, 0, 0));
 
@@ -259,12 +293,19 @@ int main(void) {
             }
             // montrer le dessin ( il était caché pour les calculs)
             SDL_RenderPresent(renderer); 
+            SDL_Delay(10000);
+            sauvegarder_image(renderer, x_taille, y_taille);
+            image_finale = true;
+            SDL_Delay(10);
         }
 
     }
 
     SDL_DestroyRenderer(renderer); // free
     SDL_DestroyWindow(window); // free
+    for (size_t i = 0; i < scene.shapes_.size(); ++i) {
+        delete scene.shapes_[i];
+    }
     SDL_Quit(); 
     return 0;
 }
