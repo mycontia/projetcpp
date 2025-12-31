@@ -135,6 +135,12 @@ bool egal (Vector3f v1, Vector3f v2);
  */
 float max(float a, float b);
 
+/** * @brief capture l'ecran actuel et le sauve en .bmp
+ * @param rend le pinceau SDL
+ * @param x largeur de la fenetre
+ * @param y hauteur
+ */
+void sauvegarder_image(SDL_Renderer* rend, int x, int y, std::string fichier);
 
 /**
  * @class Ray3f
@@ -349,7 +355,7 @@ class Scene {
          * @param height 
          * @param filename 
          */
-        void render(int width, int height, std::string filename);
+        void render(int x_taille, int y_taille, std::string fichier, Scene scene);
 };
 
 // Fonctions de rendu globales

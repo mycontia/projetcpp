@@ -14,35 +14,6 @@
 #include "rayon.h"
 
 
-/** * @brief capture l'ecran actuel et le sauve en .bmp
- * @param rend le pinceau SDL
- * @param x largeur de la fenetre
- * @param y hauteur
- */
-void sauvegarder_image(SDL_Renderer* rend, int x, int y) {
-    // on crée une surface temporaire en RAM
-    SDL_Surface* surface = SDL_CreateRGBSurface(0, x, y, 32, 0, 0, 0, 0);
-    
-    if (surface == nullptr) {
-        std::cout << "Erreur surface : " << SDL_GetError() << "\n";
-        return;
-    }
-
-    // on lit les pixels du GPU vers notre surface
-    // attention au format ARGB8888 souvent utilisé par SDL2
-    SDL_RenderReadPixels(rend, NULL, SDL_PIXELFORMAT_ARGB8888, surface->pixels, surface->pitch);
-
-    // ecriture du fichier (on met .bmp car c'est natif a SDL)
-    if (SDL_SaveBMP(surface, "scene.bmp") != 0) {
-        std::cout << "Echec de la sauvegarde... : " << SDL_GetError() << "\n";
-    } else {
-        std::cout << "Image enregistrée avec succes dans scene.bmp !\n";
-    }
-
-    
-    SDL_FreeSurface(surface);
-}
-
 
 /** * @brief fonction main
  * @return 0 si succès -1 si erreur
@@ -53,194 +24,199 @@ void sauvegarder_image(SDL_Renderer* rend, int x, int y) {
 
 
 int main(void) {
+    
     //taille de l'écran
     int y_taille = 640;
     int x_taille = y_taille;
-
-    // fenetre , SDL_WINDOWPOS_CENTERED 2 fois pour dire la position x et y où je veux que ma fenêtre soit, taille de la fenêtre large
-    // puis haut, et 0 pour 0 options supplémentaires
-    // Création du renderer pour pouvoir dessiner des points
-    // renderer = pinceau , -1 c'est un truc par défaut, c'est une sorte d'outil utilisé pour dessiner, 
-    //genre pinceau ou crayon, et SDL_RENDERER_ACCELERATED c'est pour utiliser le GPU au lieu du CPU
-    //en fait c'est pour aller plus vite
-    Sdl ecran(x_taille, y_taille); 
-    
-
-
-    
-    Vector3f h = Vector3f(-0.15, 0.5, 0.5f);
-    Vector3f w = Vector3f(0.5, 0.15, 0);
-    try{
-
-        if (prod_scal(h,w) != 0){
-            throw "les axes largeurs et hauteurs du quadrilatère ne sont pas perpendiculaires !";
-        } 
-    }
-    catch(const char* msg) {
-        std::cout << "Erreur : " << msg << "\n";
-        return -1;
-    }
-
-    Material rouge(255, 0, 0, 0.4f);
-    Material bleu(0, 0, 255, 0.5f);
-    Material vert(0, 255, 0, 0);
-    Material jaune(255,255,0,0);
-
-    Cube* c = new Cube(Vector3f(0.1f, 0.0f,1.0f), w, h ,bleu);
-    Sphere* s = new Sphere(Vector3f(-0.8f, 0.0f, 0.3f), 0.5f, rouge);
-    //Quad* q = new Quad(Vector3f(0.6f, -0.1f, -1.0f), Vector3f(0.1f, 0.2f, 0.1f), Vector3f(0.4f, 0.1f, 0.1f), jaune);
-    Quad* q = new Quad(Vector3f(0.6f, -0.1f, 0.3f), Vector3f(0.1f, 0.2f, 0.1f), Vector3f(0.4f, 0.1f, 0.1f), jaune);
-    
-    //if (camera_.position_ && source_.origin  not in box){}
-    //throw 
+    std::string fichier = "scene.bmp" ;
 
     Scene scene;
-    //scene.box(Vector3f(-0.45f,0.0f,2.5f), 4.0f, 2.0f, 2.0f, vert);
-    scene.box(Vector3f(-0.45f,0.0f,1.5f), 4.0f, 2.0f, 2.0f, vert);
+    scene.render(x_taille, y_taille, fichier,scene);
+
+    // // fenetre , SDL_WINDOWPOS_CENTERED 2 fois pour dire la position x et y où je veux que ma fenêtre soit, taille de la fenêtre large
+    // // puis haut, et 0 pour 0 options supplémentaires
+    // // Création du renderer pour pouvoir dessiner des points
+    // // renderer = pinceau , -1 c'est un truc par défaut, c'est une sorte d'outil utilisé pour dessiner, 
+    // //genre pinceau ou crayon, et SDL_RENDERER_ACCELERATED c'est pour utiliser le GPU au lieu du CPU
+    // //en fait c'est pour aller plus vite
+    // Sdl ecran(x_taille, y_taille); 
+    
+
+
+    
+    // Vector3f h = Vector3f(-0.15, 0.5, 0.5f);
+    // Vector3f w = Vector3f(0.5, 0.15, 0);
+    // try{
+
+    //     if (prod_scal(h,w) != 0){
+    //         throw "les axes largeurs et hauteurs du quadrilatère ne sont pas perpendiculaires !";
+    //     } 
+    // }
+    // catch(const char* msg) {
+    //     std::cout << "Erreur : " << msg << "\n";
+    //     return -1;
+    // }
+
+    // Material rouge(255, 0, 0, 0.4f);
+    // Material bleu(0, 0, 255, 0.5f);
+    // Material vert(0, 255, 0, 0);
+    // Material jaune(255,255,0,0);
+
+    // Cube* c = new Cube(Vector3f(0.1f, 0.0f,1.0f), w, h ,bleu);
+    // Sphere* s = new Sphere(Vector3f(-0.8f, 0.0f, 0.3f), 0.5f, rouge);
+    // //Quad* q = new Quad(Vector3f(0.6f, -0.1f, -1.0f), Vector3f(0.1f, 0.2f, 0.1f), Vector3f(0.4f, 0.1f, 0.1f), jaune);
+    // Quad* q = new Quad(Vector3f(0.6f, -0.1f, 0.3f), Vector3f(0.1f, 0.2f, 0.1f), Vector3f(0.4f, 0.1f, 0.1f), jaune);
+    
+    // //if (camera_.position_ && source_.origin  not in box){}
+    // //throw 
+
+    // Scene scene;
+    // //scene.box(Vector3f(-0.45f,0.0f,2.5f), 4.0f, 2.0f, 2.0f, vert);
+    // scene.box(Vector3f(-0.45f,0.0f,1.5f), 4.0f, 2.0f, 2.0f, vert);
 
 
 
-    scene.camera_ = Camera(Vector3f(0.4, -0.5f, -5), Vector3f(0, 0, 1));
-    scene.shapes_.push_back(c);
-    scene.shapes_.push_back(s);
-    scene.shapes_.push_back(q);
+    // scene.camera_ = Camera(Vector3f(0.4, -0.5f, -5), Vector3f(0, 0, 1));
+    // scene.shapes_.push_back(c);
+    // scene.shapes_.push_back(s);
+    // scene.shapes_.push_back(q);
 
 
     
 
 
-    scene.source_ = Ray3f(Vector3f(0.4, -1.0f, -2), Vector3f(0, 1, 0));
+    // scene.source_ = Ray3f(Vector3f(0.4, -1.0f, -2), Vector3f(0, 1, 0));
     
 
-    bool running = true;
-    bool image_finale = false;
-    while (running) {
-        SDL_Event e;
-        //tant qu'il y a un evenement dans la fenetre sdl
-        while (SDL_PollEvent(&e) != 0) {
-            // si jamais il se passe un truc de type quit c est à dire la croix et bien on quitte
-            if (e.type == SDL_QUIT) running = false;
+    // bool running = true;
+    // bool image_finale = false;
+    // while (running) {
+    //     SDL_Event e;
+    //     //tant qu'il y a un evenement dans la fenetre sdl
+    //     while (SDL_PollEvent(&e) != 0) {
+    //         // si jamais il se passe un truc de type quit c est à dire la croix et bien on quitte
+    //         if (e.type == SDL_QUIT) running = false;
             
-            if (e.type == SDL_KEYDOWN) {
-                float vitesse = 0.5f;
-                switch (e.key.keysym.sym) {
-                    // Déplacement de la LUMIÈRE (Source)
-                    case SDLK_z: scene.source_.origin_.y_ -= vitesse; break; // Monte (Y diminue)
-                    case SDLK_s: scene.source_.origin_.y_ += vitesse; break; // Descend (Y augmente)
-                    case SDLK_q: scene.source_.origin_.x_ -= vitesse; break; // Gauche (X diminue)
-                    case SDLK_d: scene.source_.origin_.x_ += vitesse; break; // Droite (X augmente)
-                    case SDLK_e: scene.source_.origin_.z_ += vitesse; break; // Fond (Z augmente)
-                    case SDLK_w: scene.source_.origin_.z_ -= vitesse; break; // Vers nous (Z diminue)
+    //         if (e.type == SDL_KEYDOWN) {
+    //             float vitesse = 0.5f;
+    //             switch (e.key.keysym.sym) {
+    //                 // Déplacement de la LUMIÈRE (Source)
+    //                 case SDLK_z: scene.source_.origin_.y_ -= vitesse; break; // Monte (Y diminue)
+    //                 case SDLK_s: scene.source_.origin_.y_ += vitesse; break; // Descend (Y augmente)
+    //                 case SDLK_q: scene.source_.origin_.x_ -= vitesse; break; // Gauche (X diminue)
+    //                 case SDLK_d: scene.source_.origin_.x_ += vitesse; break; // Droite (X augmente)
+    //                 case SDLK_e: scene.source_.origin_.z_ += vitesse; break; // Fond (Z augmente)
+    //                 case SDLK_w: scene.source_.origin_.z_ -= vitesse; break; // Vers nous (Z diminue)
                     
-                    // Conservation des flèches pour la CAMÉRA
-                    case SDLK_UP:    scene.camera_.position_.y_ += vitesse; break; 
-                    case SDLK_DOWN:  scene.camera_.position_.y_ -= vitesse; break;
-                    case SDLK_LEFT:  scene.camera_.position_.x_ += vitesse; break;
-                    case SDLK_RIGHT: scene.camera_.position_.x_ -= vitesse; break;
-                }
-                image_finale = false; 
-                ecran.clear(); 
-            }
-        }
+    //                 // Conservation des flèches pour la CAMÉRA
+    //                 case SDLK_UP:    scene.camera_.position_.y_ += vitesse; break; 
+    //                 case SDLK_DOWN:  scene.camera_.position_.y_ -= vitesse; break;
+    //                 case SDLK_LEFT:  scene.camera_.position_.x_ += vitesse; break;
+    //                 case SDLK_RIGHT: scene.camera_.position_.x_ -= vitesse; break;
+    //             }
+    //             image_finale = false; 
+    //             ecran.clear(); 
+    //         }
+    //     }
         
-        if (!image_finale){
-            // double boucle
-            for (int y = 0; y < y_taille; y++) {
-                for (int x = 0; x < x_taille; x++) {
+    //     if (!image_finale){
+    //         // double boucle
+    //         for (int y = 0; y < y_taille; y++) {
+    //             for (int x = 0; x < x_taille; x++) {
                     
-                    // On transforme x et y (0 à 640) en coordonnées centrées (-1.0 à 1.0)
-                    // pour que le centre de l'écran soit (0,0)
+    //                 // On transforme x et y (0 à 640) en coordonnées centrées (-1.0 à 1.0)
+    //                 // pour que le centre de l'écran soit (0,0)
                     
-                    float coord_x = (x - x_taille / 2.0f) / (x_taille / 2.0f);
-                    float coord_y = (y - y_taille / 2.0f) / (y_taille / 2.0f);
+    //                 float coord_x = (x - x_taille / 2.0f) / (x_taille / 2.0f);
+    //                 float coord_y = (y - y_taille / 2.0f) / (y_taille / 2.0f);
 
                         
 
-                    // Création du rayon : 
-                    // La direction est : PointSurEcran - PositionCaméra
+    //                 // Création du rayon : 
+    //                 // La direction est : PointSurEcran - PositionCaméra
                     
-                    Vector3f direction = (Vector3f(coord_x, coord_y, -2.0f) - scene.camera_.position_).normalise();
-                    Ray3f ray(scene.camera_.position_, direction);
-                    // par défaut on met en noir
-                    ecran.drawcolor(0, 0, 0, 255);
+    //                 Vector3f direction = (Vector3f(coord_x, coord_y, -2.0f) - scene.camera_.position_).normalise();
+    //                 Ray3f ray(scene.camera_.position_, direction);
+    //                 // par défaut on met en noir
+    //                 ecran.drawcolor(0, 0, 0, 255);
 
-                    float dist_min = INFINITY;
-                    Shape* shape_proche = nullptr; 
-                    answer pt_proche;
+    //                 float dist_min = INFINITY;
+    //                 Shape* shape_proche = nullptr; 
+    //                 answer pt_proche;
 
-                    for (size_t i =0; i< scene.shapes_.size(); i++){
-                        answer rep = scene.shapes_[i]->is_hit(ray);
-                        if (rep.hit) {
-                            float dist = (rep.pt_inter - scene.camera_.position_).norme();
-                            if (dist < dist_min) {
-                                dist_min = dist;
-                                shape_proche = scene.shapes_[i];
-                                pt_proche = rep;
-                            }
-                        }
-                    }
-                    /*
-                    Pour faire l'ombre on applique la même logique que lorsque l'on affiche un point sur l'écran.
-                    Avant de colorer un point sur l'écran on veut vérifier si celui-ci n'est pas à l'ombre.
-                    On regarde le rayon de la source vers ce point et on voit s'il intersecte un autre point que ce point.
-                    Si c'est le cas ce point est à l'ombre.
+    //                 for (size_t i =0; i< scene.shapes_.size(); i++){
+    //                     answer rep = scene.shapes_[i]->is_hit(ray);
+    //                     if (rep.hit) {
+    //                         float dist = (rep.pt_inter - scene.camera_.position_).norme();
+    //                         if (dist < dist_min) {
+    //                             dist_min = dist;
+    //                             shape_proche = scene.shapes_[i];
+    //                             pt_proche = rep;
+    //                         }
+    //                     }
+    //                 }
+    //                 /*
+    //                 Pour faire l'ombre on applique la même logique que lorsque l'on affiche un point sur l'écran.
+    //                 Avant de colorer un point sur l'écran on veut vérifier si celui-ci n'est pas à l'ombre.
+    //                 On regarde le rayon de la source vers ce point et on voit s'il intersecte un autre point que ce point.
+    //                 Si c'est le cas ce point est à l'ombre.
                     
-                    */
-                    if (shape_proche != nullptr) {
-                        // rayon d'ombre
-                        Vector3f versLumiere = (scene.source_.origin_ - pt_proche.pt_inter).normalise();
-                        //distance de mon objet à la source de lumière
-                        float distlum = (scene.source_.origin_ - pt_proche.pt_inter).norme();
+    //                 */
+    //                 if (shape_proche != nullptr) {
+    //                     // rayon d'ombre
+    //                     Vector3f versLumiere = (scene.source_.origin_ - pt_proche.pt_inter).normalise();
+    //                     //distance de mon objet à la source de lumière
+    //                     float distlum = (scene.source_.origin_ - pt_proche.pt_inter).norme();
                         
-                        // je rajoute un bout du vect norm pour éviter d'être hit par moi-même
-                        Ray3f rayOmbre(pt_proche.pt_inter + (pt_proche.norm * 0.001f), versLumiere);
+    //                     // je rajoute un bout du vect norm pour éviter d'être hit par moi-même
+    //                     Ray3f rayOmbre(pt_proche.pt_inter + (pt_proche.norm * 0.001f), versLumiere);
                         
-                        bool testombre = false;
+    //                     bool testombre = false;
 
-                        // est ce que je hit un autre objet avant la lumière 
-                        for (size_t j = 0; j < scene.shapes_.size(); j++) {
-                            answer hitOmbre = scene.shapes_[j]->is_hit(rayOmbre);
-                            //distance d'un obstacle à la source de lumière
-                            float distobst = (scene.source_.origin_ - hitOmbre.pt_inter).norme();
-                            if (hitOmbre.hit) {
-                                if (distobst > 0.001f && distobst < distlum ) {
-                                    testombre = true;
-                                    break; 
-                                }
+    //                     // est ce que je hit un autre objet avant la lumière 
+    //                     for (size_t j = 0; j < scene.shapes_.size(); j++) {
+    //                         answer hitOmbre = scene.shapes_[j]->is_hit(rayOmbre);
+    //                         //distance d'un obstacle à la source de lumière
+    //                         float distobst = (scene.source_.origin_ - hitOmbre.pt_inter).norme();
+    //                         if (hitOmbre.hit) {
+    //                             if (distobst > 0.001f && distobst < distlum ) {
+    //                                 testombre = true;
+    //                                 break; 
+    //                             }
                                 
                                 
-                            }
-                        }
+    //                         }
+    //                     }
 
                         
-                        if (testombre) {
-                            // intensité faible 
-                            draw_color(ecran.renderer, shape_proche->matter_, 0.3f);
-                        } else {
-                            Vector3f direction = (Vector3f(coord_x, coord_y, -2.0f) - scene.camera_.position_).normalise();
-                            Ray3f ray_init(scene.camera_.position_, direction);
-                            Material c = recursive(ray_init, scene, 0);
-                            ecran.drawcolor(c.r_, c.g_, c.b_, 255);
-                        }
+    //                     if (testombre) {
+    //                         // intensité faible 
+    //                         draw_color(ecran.renderer, shape_proche->matter_, 0.3f);
+    //                     } else {
+    //                         Vector3f direction = (Vector3f(coord_x, coord_y, -2.0f) - scene.camera_.position_).normalise();
+    //                         Ray3f ray_init(scene.camera_.position_, direction);
+    //                         Material c = recursive(ray_init, scene, 0);
+    //                         ecran.drawcolor(c.r_, c.g_, c.b_, 255);
+    //                     }
                         
-                    }
+    //                 }
                     
-                    // je veux que le pinceau se pose en x y
-                    ecran.drawpoint(x, y);
+    //                 // je veux que le pinceau se pose en x y
+    //                 ecran.drawpoint(x, y);
                     
-                }
-            }
-            // montrer le dessin ( il était caché pour les calculs)
-            sauvegarder_image(ecran.renderer, x_taille, y_taille);
-            ecran.present(); 
-            image_finale = true;
-            SDL_Delay(10);
-        }
+    //             }
+    //         }
+    //         // montrer le dessin ( il était caché pour les calculs)
+    //         sauvegarder_image(ecran.renderer, x_taille, y_taille, fichier);
+    //         ecran.present(); 
+    //         image_finale = true;
+    //         SDL_Delay(10);
+    //     }
 
-    }
+    // }
 
-    for (size_t i = 0; i < scene.shapes_.size(); ++i) {
-        delete scene.shapes_[i];
-    }
+    // for (size_t i = 0; i < scene.shapes_.size(); ++i) {
+    //     delete scene.shapes_[i];
+    // }
     return 0;
 }
