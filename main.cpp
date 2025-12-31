@@ -96,7 +96,7 @@ int main(void) {
     Material vert(0, 255, 0, 0);
     Material jaune(255,255,0,0);
 
-    Cube* c = new Cube(Vector3f(0.1f, 0.0f, 1.0f), h, w, bleu);
+    Cube* c = new Cube(Vector3f(0.1f, 0.0f,1.0f), w, h ,bleu);
     Sphere* s = new Sphere(Vector3f(-0.8f, 0.0f, 0.3f), 0.5f, rouge);
     //Quad* q = new Quad(Vector3f(0.6f, -0.1f, -1.0f), Vector3f(0.1f, 0.2f, 0.1f), Vector3f(0.4f, 0.1f, 0.1f), jaune);
     Quad* q = new Quad(Vector3f(0.6f, -0.1f, 0.3f), Vector3f(0.1f, 0.2f, 0.1f), Vector3f(0.4f, 0.1f, 0.1f), jaune);
@@ -292,10 +292,9 @@ int main(void) {
                 }
             }
             // montrer le dessin ( il était caché pour les calculs)
-            sauvegarder_image(renderer, x_taille, y_taille);
             SDL_RenderPresent(renderer); 
-            //SDL_Delay(10000);
-            //sauvegarder_image(renderer, x_taille, y_taille);
+            SDL_Delay(10000);
+            sauvegarder_image(renderer, x_taille, y_taille);
             image_finale = true;
             SDL_Delay(10);
         }
