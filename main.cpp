@@ -292,9 +292,8 @@ int main(void) {
                 }
             }
             // montrer le dessin ( il était caché pour les calculs)
-            SDL_RenderPresent(renderer); 
-            SDL_Delay(10000);
             sauvegarder_image(renderer, x_taille, y_taille);
+            SDL_RenderPresent(renderer); 
             image_finale = true;
             SDL_Delay(10);
         }
