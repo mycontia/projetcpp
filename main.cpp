@@ -185,7 +185,13 @@ int main(void) {
                             }
                         }
                     }
+                    /*
+                    Pour faire l'ombre on applique la même logique que lorsque l'on affiche un point sur l'écran.
+                    Avant de colorer un point sur l'écran on veut vérifier si celui-ci n'est pas à l'ombre.
+                    On regarde le rayon de la source vers ce point et on voit s'il intersecte un autre point que ce point.
+                    Si c'est le cas ce point est à l'ombre.
                     
+                    */
                     if (shape_proche != nullptr) {
                         // rayon d'ombre
                         Vector3f versLumiere = (scene.source_.origin_ - pt_proche.pt_inter).normalise();
