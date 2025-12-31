@@ -355,7 +355,7 @@ class Scene {
          * @param height 
          * @param filename 
          */
-        void render(int x_taille, int y_taille, std::string fichier, Scene scene);
+        void render(int x_taille, int y_taille, std::string fichier);
 };
 
 // Fonctions de rendu globales

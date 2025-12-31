@@ -328,7 +328,7 @@ void sauvegarder_image(SDL_Renderer* rend, int x, int y, std::string fichier) {
 }
 
 
-void Scene::render(int x_taille, int y_taille, std::string fichier, Scene scene){
+void Scene::render(int x_taille, int y_taille, std::string fichier){
     // fenetre , SDL_WINDOWPOS_CENTERED 2 fois pour dire la position x et y où je veux que ma fenêtre soit, taille de la fenêtre large
     // puis haut, et 0 pour 0 options supplémentaires
     // Création du renderer pour pouvoir dessiner des points
@@ -368,20 +368,20 @@ void Scene::render(int x_taille, int y_taille, std::string fichier, Scene scene)
 
     //Scene scene;
     //scene.box(Vector3f(-0.45f,0.0f,2.5f), 4.0f, 2.0f, 2.0f, vert);
-    scene.box(Vector3f(-0.45f,0.0f,1.5f), 4.0f, 2.0f, 2.0f, vert);
+    this->box(Vector3f(-0.45f,0.0f,1.5f), 4.0f, 2.0f, 2.0f, vert);
 
 
 
-    scene.camera_ = Camera(Vector3f(0.4, -0.5f, -5), Vector3f(0, 0, 1));
-    scene.shapes_.push_back(c);
-    scene.shapes_.push_back(s);
-    scene.shapes_.push_back(q);
+    this->camera_ = Camera(Vector3f(0.4, -0.5f, -5), Vector3f(0, 0, 1));
+    this->shapes_.push_back(c);
+    this->shapes_.push_back(s);
+    this->shapes_.push_back(q);
 
 
     
 
 
-    scene.source_ = Ray3f(Vector3f(0.4, -1.0f, -2), Vector3f(0, 1, 0));
+    this->source_ = Ray3f(Vector3f(0.4, -1.0f, -2), Vector3f(0, 1, 0));
     
 
     bool running = true;
@@ -397,18 +397,18 @@ void Scene::render(int x_taille, int y_taille, std::string fichier, Scene scene)
                 float vitesse = 0.5f;
                 switch (e.key.keysym.sym) {
                     // Déplacement de la LUMIÈRE (Source)
-                    case SDLK_z: scene.source_.origin_.y_ -= vitesse; break; // Monte (Y diminue)
-                    case SDLK_s: scene.source_.origin_.y_ += vitesse; break; // Descend (Y augmente)
-                    case SDLK_q: scene.source_.origin_.x_ -= vitesse; break; // Gauche (X diminue)
-                    case SDLK_d: scene.source_.origin_.x_ += vitesse; break; // Droite (X augmente)
-                    case SDLK_e: scene.source_.origin_.z_ += vitesse; break; // Fond (Z augmente)
-                    case SDLK_w: scene.source_.origin_.z_ -= vitesse; break; // Vers nous (Z diminue)
+                    case SDLK_z: this->source_.origin_.y_ -= vitesse; break; // Monte (Y diminue)
+                    case SDLK_s: this->source_.origin_.y_ += vitesse; break; // Descend (Y augmente)
+                    case SDLK_q: this->source_.origin_.x_ -= vitesse; break; // Gauche (X diminue)
+                    case SDLK_d: this->source_.origin_.x_ += vitesse; break; // Droite (X augmente)
+                    case SDLK_e: this->source_.origin_.z_ += vitesse; break; // Fond (Z augmente)
+                    case SDLK_w: this->source_.origin_.z_ -= vitesse; break; // Vers nous (Z diminue)
                     
                     // Conservation des flèches pour la CAMÉRA
-                    case SDLK_UP:    scene.camera_.position_.y_ += vitesse; break; 
-                    case SDLK_DOWN:  scene.camera_.position_.y_ -= vitesse; break;
-                    case SDLK_LEFT:  scene.camera_.position_.x_ += vitesse; break;
-                    case SDLK_RIGHT: scene.camera_.position_.x_ -= vitesse; break;
+                    case SDLK_UP:    this->camera_.position_.y_ += vitesse; break; 
+                    case SDLK_DOWN:  this->camera_.position_.y_ -= vitesse; break;
+                    case SDLK_LEFT:  this->camera_.position_.x_ += vitesse; break;
+                    case SDLK_RIGHT: this->camera_.position_.x_ -= vitesse; break;
                 }
                 image_finale = false; 
                 ecran.clear(); 
@@ -431,8 +431,8 @@ void Scene::render(int x_taille, int y_taille, std::string fichier, Scene scene)
                     // Création du rayon : 
                     // La direction est : PointSurEcran - PositionCaméra
                     
-                    Vector3f direction = (Vector3f(coord_x, coord_y, -2.0f) - scene.camera_.position_).normalise();
-                    Ray3f ray(scene.camera_.position_, direction);
+                    Vector3f direction = (Vector3f(coord_x, coord_y, -2.0f) - this->camera_.position_).normalise();
+                    Ray3f ray(this->camera_.position_, direction);
                     // par défaut on met en noir
                     ecran.drawcolor(0, 0, 0, 255);
 
@@ -440,13 +440,13 @@ void Scene::render(int x_taille, int y_taille, std::string fichier, Scene scene)
                     Shape* shape_proche = nullptr; 
                     answer pt_proche;
 
-                    for (size_t i =0; i< scene.shapes_.size(); i++){
-                        answer rep = scene.shapes_[i]->is_hit(ray);
+                    for (size_t i =0; i< this->shapes_.size(); i++){
+                        answer rep = this->shapes_[i]->is_hit(ray);
                         if (rep.hit) {
-                            float dist = (rep.pt_inter - scene.camera_.position_).norme();
+                            float dist = (rep.pt_inter - this->camera_.position_).norme();
                             if (dist < dist_min) {
                                 dist_min = dist;
-                                shape_proche = scene.shapes_[i];
+                                shape_proche = this->shapes_[i];
                                 pt_proche = rep;
                             }
                         }
@@ -460,9 +460,9 @@ void Scene::render(int x_taille, int y_taille, std::string fichier, Scene scene)
                     */
                     if (shape_proche != nullptr) {
                         // rayon d'ombre
-                        Vector3f versLumiere = (scene.source_.origin_ - pt_proche.pt_inter).normalise();
+                        Vector3f versLumiere = (this->source_.origin_ - pt_proche.pt_inter).normalise();
                         //distance de mon objet à la source de lumière
-                        float distlum = (scene.source_.origin_ - pt_proche.pt_inter).norme();
+                        float distlum = (this->source_.origin_ - pt_proche.pt_inter).norme();
                         
                         // je rajoute un bout du vect norm pour éviter d'être hit par moi-même
                         Ray3f rayOmbre(pt_proche.pt_inter + (pt_proche.norm * 0.001f), versLumiere);
@@ -470,10 +470,10 @@ void Scene::render(int x_taille, int y_taille, std::string fichier, Scene scene)
                         bool testombre = false;
 
                         // est ce que je hit un autre objet avant la lumière 
-                        for (size_t j = 0; j < scene.shapes_.size(); j++) {
-                            answer hitOmbre = scene.shapes_[j]->is_hit(rayOmbre);
+                        for (size_t j = 0; j < this->shapes_.size(); j++) {
+                            answer hitOmbre = this->shapes_[j]->is_hit(rayOmbre);
                             //distance d'un obstacle à la source de lumière
-                            float distobst = (scene.source_.origin_ - hitOmbre.pt_inter).norme();
+                            float distobst = (this->source_.origin_ - hitOmbre.pt_inter).norme();
                             if (hitOmbre.hit) {
                                 if (distobst > 0.001f && distobst < distlum ) {
                                     testombre = true;
@@ -489,9 +489,10 @@ void Scene::render(int x_taille, int y_taille, std::string fichier, Scene scene)
                             // intensité faible 
                             draw_color(ecran.renderer, shape_proche->matter_, 0.3f);
                         } else {
-                            Vector3f direction = (Vector3f(coord_x, coord_y, -2.0f) - scene.camera_.position_).normalise();
-                            Ray3f ray_init(scene.camera_.position_, direction);
-                            Material c = recursive(ray_init, scene, 0);
+                            Vector3f direction = (Vector3f(coord_x, coord_y, -2.0f) - this->camera_.position_).normalise();
+                            Ray3f ray_init(this->camera_.position_, direction);
+                            //Material c = recursive(ray_init, this, 0);
+                            Material c = recursive(ray_init, *this, 0);
                             ecran.drawcolor(c.r_, c.g_, c.b_, 255);
                         }
                         
@@ -511,7 +512,7 @@ void Scene::render(int x_taille, int y_taille, std::string fichier, Scene scene)
 
     }
 
-    for (size_t i = 0; i < scene.shapes_.size(); ++i) {
-        delete scene.shapes_[i];
+    for (size_t i = 0; i < this->shapes_.size(); ++i) {
+        delete this->shapes_[i];
     }
 }

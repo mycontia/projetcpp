@@ -31,7 +31,7 @@ int main(void) {
     std::string fichier = "scene.bmp" ;
 
     Scene scene;
-    scene.render(x_taille, y_taille, fichier,scene);
+    scene.render(x_taille, y_taille, fichier);
 
     // // fenetre , SDL_WINDOWPOS_CENTERED 2 fois pour dire la position x et y où je veux que ma fenêtre soit, taille de la fenêtre large
     // // puis haut, et 0 pour 0 options supplémentaires
