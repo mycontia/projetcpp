@@ -362,4 +362,44 @@ void draw_color(SDL_Renderer* rend, Material col, float intens);
  */
 Material recursive(Ray3f ray, Scene scene, int count);
 
+
+class Sdl {
+public:
+    SDL_Window* window;
+    SDL_Renderer* renderer; // Public comme demandé
+    int x_taille;
+    int y_taille;
+
+    Sdl(int x, int y) : x_taille(x), y_taille(y) {
+        init(); // Appelle ton init perso
+        window = SDL_CreateWindow("Ray Tracing MVP0.1", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, x_taille, y_taille, 0);
+        renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    }
+
+    ~Sdl() {
+        SDL_DestroyRenderer(renderer);
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+    }
+
+    // Tes fonctions simplifiées
+    void init() { SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER); }
+    
+    void drawcolor(int r, int g, int b, int a) { 
+        SDL_SetRenderDrawColor(renderer, r, g, b, a); 
+    }
+    
+    void drawpoint(int x, int y) { 
+        SDL_RenderDrawPoint(renderer, x, y); 
+    }
+
+    void present() { SDL_RenderPresent(renderer); }
+    
+    void clear() {
+        drawcolor(0, 0, 0, 255);
+        SDL_RenderClear(renderer);
+    }
+};
+
+
 #endif

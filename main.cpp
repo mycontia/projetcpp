@@ -1,5 +1,4 @@
-/** 
- * @file main.cpp
+/** * @file main.cpp
  * @brief affiche l'image
  * @details Initialise SDL, crée de la scène (objets, caméra, lumière)
  * calcul d'ombres 
@@ -45,8 +44,7 @@ void sauvegarder_image(SDL_Renderer* rend, int x, int y) {
 }
 
 
-/** 
- * @brief fonction main
+/** * @brief fonction main
  * @return 0 si succès -1 si erreur
 
 
@@ -55,20 +53,17 @@ void sauvegarder_image(SDL_Renderer* rend, int x, int y) {
 
 
 int main(void) {
-    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER);
     //taille de l'écran
     int y_taille = 640;
     int x_taille = y_taille;
 
     // fenetre , SDL_WINDOWPOS_CENTERED 2 fois pour dire la position x et y où je veux que ma fenêtre soit, taille de la fenêtre large
     // puis haut, et 0 pour 0 options supplémentaires
-    SDL_Window* window = SDL_CreateWindow("Ray Tracing MVP0.1", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, x_taille, y_taille, 0);
-    
     // Création du renderer pour pouvoir dessiner des points
     // renderer = pinceau , -1 c'est un truc par défaut, c'est une sorte d'outil utilisé pour dessiner, 
     //genre pinceau ou crayon, et SDL_RENDERER_ACCELERATED c'est pour utiliser le GPU au lieu du CPU
     //en fait c'est pour aller plus vite
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    Sdl ecran(x_taille, y_taille); 
     
 
 
@@ -114,7 +109,7 @@ int main(void) {
     
 
 
-    scene.source_ = Ray3f(Vector3f(1.4, -1.0f, -5), Vector3f(0, 1, 0));
+    scene.source_ = Ray3f(Vector3f(0.4, -1.0f, -2), Vector3f(0, 1, 0));
     
 
     bool running = true;
@@ -144,8 +139,7 @@ int main(void) {
                     case SDLK_RIGHT: scene.camera_.position_.x_ -= vitesse; break;
                 }
                 image_finale = false; 
-                SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-                SDL_RenderClear(renderer); 
+                ecran.clear(); 
             }
         }
         
@@ -168,7 +162,7 @@ int main(void) {
                     Vector3f direction = (Vector3f(coord_x, coord_y, -2.0f) - scene.camera_.position_).normalise();
                     Ray3f ray(scene.camera_.position_, direction);
                     // par défaut on met en noir
-                    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+                    ecran.drawcolor(0, 0, 0, 255);
 
                     float dist_min = INFINITY;
                     Shape* shape_proche = nullptr; 
@@ -221,39 +215,32 @@ int main(void) {
                         
                         if (testombre) {
                             // intensité faible 
-                            draw_color(renderer, shape_proche->matter_, 0.3f);
+                            draw_color(ecran.renderer, shape_proche->matter_, 0.3f);
                         } else {
                             Vector3f direction = (Vector3f(coord_x, coord_y, -2.0f) - scene.camera_.position_).normalise();
                             Ray3f ray_init(scene.camera_.position_, direction);
                             Material c = recursive(ray_init, scene, 0);
-                            SDL_SetRenderDrawColor(renderer,c.r_, c.g_, c.b_, 255);
+                            ecran.drawcolor(c.r_, c.g_, c.b_, 255);
                         }
                         
                     }
                     
                     // je veux que le pinceau se pose en x y
-                    SDL_RenderDrawPoint(renderer, x, y);
+                    ecran.drawpoint(x, y);
                     
                 }
             }
             // montrer le dessin ( il était caché pour les calculs)
-            sauvegarder_image(renderer, x_taille, y_taille);
-            SDL_RenderPresent(renderer); 
+            sauvegarder_image(ecran.renderer, x_taille, y_taille);
+            ecran.present(); 
             image_finale = true;
             SDL_Delay(10);
         }
 
     }
 
-    SDL_DestroyRenderer(renderer); // free
-    SDL_DestroyWindow(window); // free
     for (size_t i = 0; i < scene.shapes_.size(); ++i) {
         delete scene.shapes_[i];
     }
-    SDL_Quit(); 
     return 0;
 }
-
-
-    
-
