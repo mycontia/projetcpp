@@ -72,12 +72,7 @@ int main(void) {
     
 
 
-    // avant la boucle while 
     
-
-    //Vector3f h = Vector3f(0, 0.5, 0.425f);
-    // Vector3f h = Vector3f(0, 0.5, 0.5f);
-    // Vector3f w = Vector3f(0.5, 0.0, 0);
     Vector3f h = Vector3f(-0.15, 0.5, 0.5f);
     Vector3f w = Vector3f(0.5, 0.15, 0);
     try{
@@ -108,43 +103,7 @@ int main(void) {
     //scene.box(Vector3f(-0.45f,0.0f,2.5f), 4.0f, 2.0f, 2.0f, vert);
     scene.box(Vector3f(-0.45f,0.0f,1.5f), 4.0f, 2.0f, 2.0f, vert);
 
-/*
 
-    Quad* qback = new Quad(
-        Vector3f(0.0f, 0.0f, 2.0f), // Centre du quad
-        Vector3f(0.0f, 2.0f, 0.0f),  // Sa hauteur (Y)
-        Vector3f(2.0f, 0.0f, 0.0f),  // Sa longueur/profondeur (Z)
-        vert
-    );
-    
-    Quad* qleft = new Quad(
-        Vector3f(-1.0f, 0.0f, 1.0f), 
-        Vector3f(0.0f, 2.0f, 0.0f),  
-        Vector3f(0.0f, 0.0f, 2.0f),  
-        vert
-    );
-
-    Quad* qright = new Quad(
-        Vector3f(1.0f, 0.0f, 1.0f), 
-        //inversion des coordonnées par rapport à qleft
-        // pour orienter le vecteur normal vers l'intérieur du "cube"
-        Vector3f(0.0f, 0.0f, 2.0f),  
-        Vector3f(0.0f, 2.0f, 0.0f),  
-        vert
-    );
-    Quad* qup = new Quad(
-        Vector3f(0.0f, 1.0f, 1.0f), 
-        Vector3f(2.0f, 0.0f, 0.0f),  
-        Vector3f(0.0f, 0.0f, 2.0f),  
-        vert
-    );
-    Quad* qdown = new Quad(
-        Vector3f(0.0f, -1.0f, 1.0f), 
-        Vector3f(0.0f, 0.0f, 2.0f),  
-        Vector3f(2.0f, 0.0f, 0.0f),  
-        vert
-    );
-*/
 
     scene.camera_ = Camera(Vector3f(0.4, -0.5f, -5), Vector3f(0, 0, 1));
     scene.shapes_.push_back(c);
@@ -152,20 +111,11 @@ int main(void) {
     scene.shapes_.push_back(q);
 
 
-    /*
-    scene.shapes_.push_back(qup);
-    scene.shapes_.push_back(qdown);
-    scene.shapes_.push_back(qleft);
-    scene.shapes_.push_back(qright);
-    scene.shapes_.push_back(qback);
+    
 
-*/  
+
     scene.source_ = Ray3f(Vector3f(1.4, -1.0f, -5), Vector3f(0, 1, 0));
-    //scene.source_ = Ray3f(Vector3f(0.4, -0.5f, -5), Vector3f(0, 0, 1));
-
-
-    //scene.source_ = Ray3f(Vector3f(5, 5, -5), Vector3f(0, 0.7, 1));
-    //scene.source_ = Ray3f(Vector3f(0, 10.99, 1), Vector3f(0, 0, 0));
+    
 
     bool running = true;
     bool image_finale = false;
@@ -175,18 +125,7 @@ int main(void) {
         while (SDL_PollEvent(&e) != 0) {
             // si jamais il se passe un truc de type quit c est à dire la croix et bien on quitte
             if (e.type == SDL_QUIT) running = false;
-            // if (e.type == SDL_KEYDOWN) {
-            //     float vitesse = 0.7f;
-            //     switch (e.key.keysym.sym) {
-            //         case SDLK_UP:    scene.camera_.position_.y_ += vitesse; break;
-            //         case SDLK_DOWN:  scene.camera_.position_.y_ -= vitesse; break;
-            //         case SDLK_LEFT:  scene.camera_.position_.x_ -= vitesse; break;
-            //         case SDLK_RIGHT: scene.camera_.position_.x_ += vitesse; break;
-            //     }
-            //     image_finale = false; //  recalcule image
-            //     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-            //     SDL_RenderClear(renderer); // Efface l'ancienne image
-            // }
+            
             if (e.type == SDL_KEYDOWN) {
                 float vitesse = 0.5f;
                 switch (e.key.keysym.sym) {
