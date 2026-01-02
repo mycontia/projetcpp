@@ -135,10 +135,10 @@ bool egal (Vector3f v1, Vector3f v2);
  */
 float max(float a, float b);
 
-/** * @brief capture l'ecran actuel et le sauve en .bmp
- * @param rend le pinceau SDL
- * @param x largeur de la fenetre
- * @param y hauteur
+/** * @brief Capture l'ecran actuel et le sauve en .bmp.
+ * @param rend le pinceau SDL.
+ * @param x largeur de la fenetre.
+ * @param y hauteur.
  */
 void sauvegarder_image(SDL_Renderer* rend, int x, int y, std::string fichier);
 
@@ -230,8 +230,8 @@ class Shape {
         virtual answer is_hit(Ray3f ray) =0 ;  
         
         /**
-         * @brief calcul le rayon de réflexion
-         * @return le rayon réfléchi par une surface si le coefficient de brillance est non nul, le vecteur d'origine et de direction nulle sinon
+         * @brief Calcul le rayon de réflexion.
+         * @return le rayon réfléchi par une surface si le coefficient de brillance est non nul, le vecteur d'origine et de direction nulle sinon.
          */
         Ray3f reflect(Ray3f r, answer a);
 
@@ -359,6 +359,10 @@ class Scene {
 };
 
 // Fonctions de rendu globales
+/**
+ * @brief 
+ * @return 
+ */
 void draw_color(SDL_Renderer* rend, Material col, float intens);
 
 /**
