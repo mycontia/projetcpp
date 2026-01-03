@@ -157,7 +157,7 @@ float max(float a, float b)
     return a;
 }
 
-float Scene::intensite(answer a)
+float Scene::intensite(const answer& a )
 {
     if (a.hit)
     {
@@ -176,7 +176,7 @@ void draw_color(SDL_Renderer* rend, Material col, float intens)
     SDL_SetRenderDrawColor(rend, col.r_ * intens, col.g_ * intens, col.b_ * intens, 255);
 }
 
-Ray3f Shape::reflect(Ray3f r, answer a)
+Ray3f Shape::reflect(Ray3f r, const answer& a )
 {
     Ray3f reflet = Ray3f();
     if (a.hit && (matter_.shininess_ != 0)) // si le coefficient de brillande vaut 0, l'objet ne réfléchit pas le rayon
@@ -341,7 +341,7 @@ void sauvegarder_image(SDL_Renderer* rend, int x, int y, std::string fichier)
     // le format ARGB8888 est souvent utilisé par SDL2
     SDL_RenderReadPixels(rend, NULL, SDL_PIXELFORMAT_ARGB8888, surface->pixels, surface->pitch);
 
-    // écriture du fichier (on met .bmp car c'est natif a SDL)
+    // écriture du fichier (on met .bmp car c'est natif à SDL)
     if (SDL_SaveBMP(surface, fichier.c_str()) != 0)// c_str pour avoir le str du string
     { 
         std::cout << "Echec de la sauvegarde... : " << SDL_GetError() << "\n";

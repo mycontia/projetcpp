@@ -246,7 +246,7 @@ class Shape
      * @brief Calcul le rayon de réflexion.
      * @return le rayon réfléchi par une surface si le coefficient de brillance est non nul, le vecteur d'origine et de direction nulle sinon.
      */
-    Ray3f reflect(Ray3f r, answer a);
+    Ray3f reflect(Ray3f r, const answer& a); ///< a est passé par référence car c'est une structure plus grosse qu'un simple Vector3f
 
     virtual ~Shape() {}
 };
@@ -375,12 +375,17 @@ class Scene
 
     /** @brief Calcul l'intensité lumineuse au point d'intersection.
      */
-    float intensite(answer a);
+    float intensite(const answer& a ); ///< a est passé par référence car c'est une structure plus grosse qu'un simple Vector3f
 
     /**
      * @brief Fonction recursive pour les reflets.
      * @param count nombre de rebonds maximums.
-     * @return la couleur finale après que le rayon se soit réfléchit au maximum count fois
+     * @details Nous avons codé dans la méthode recursive à la fois le calcul de l'ombre et celui de la réflexion car toutes deux passent par la recherche 
+     * de la plus proche shape intersectée. Là où la réflexion s'appelle récursivement, ce n'est pas le cas pour l'ombre d'où la présence d'un compteur qui 
+     * permet non seulement de ne pas appelé la fonction récursive un nombre infini de fois (dans le cas ou deux miroirs se feraient face par exemple) mais 
+     * aussi de rajouter une condition sur ce compteur afin que seule la partie sur la réflexion soit récursive et que celle sur l'ombre ne soit appelé qu'une fois pour chaque rayon. 
+
+     * @return la couleur finale après que le rayon se soit réfléchit au maximum count fois.
      */
     Material recursive(Ray3f ray, int count);
 
