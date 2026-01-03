@@ -240,6 +240,8 @@ Material Scene::recursive(Ray3f ray, int count)
         // je rajoute un bout du vect norm pour éviter d'être hit par moi-même
         Ray3f rayOmbre(pt_proche.pt_inter + (pt_proche.norm * 0.001f), versLumiere);
 
+        float intens = intensite(pt_proche);
+
         // est ce que je hit un autre objet avant la lumière
         for (size_t j = 0; j < shapes_.size(); j++)
         {
@@ -250,13 +252,12 @@ Material Scene::recursive(Ray3f ray, int count)
             {
                 if (distobst > 0.001f && distobst < distlum)
                 {
-                    return Material(shape_proche->matter_.r_ * 0.3f,shape_proche->matter_.g_ * 0.3f,shape_proche->matter_.b_ * 0.3f, 0.0f);
+                    return Material(shape_proche->matter_.r_ * 0.3f * intens, shape_proche->matter_.g_ * 0.3f * intens, shape_proche->matter_.b_ * 0.3f * intens, 0.0f);
                 }
             }
         }
 
         // On calcule la couleur de base avec l'intensité lumineuse
-        float intens = intensite(pt_proche);
         float shininess = shape_proche->matter_.shininess_;
         Material couleur_obj(shape_proche->matter_.r_ * intens, shape_proche->matter_.g_ * intens,shape_proche->matter_.b_ * intens, shininess);
 
@@ -302,13 +303,13 @@ void Scene::box(Vector3f centre, float w, float h, float d, Material m)
         m);
 
     Quad* qup = new Quad(
-        centre + y * (h * 0.5f),
+        centre + y * (-h * 0.5f),
         z * d,
         x * w,
         m);
 
     Quad* qdown = new Quad(
-        centre + y * (-h * 0.5f),
+        centre + y * (h * 0.5f),
         x * w,
         z * d,
         m);
@@ -381,13 +382,13 @@ void Scene::render(int x_taille, int y_taille, std::string fichier)
     }
 
     // Création des couleurs avec un coefficient de brillance
-    Material rouge(255, 0, 0, 0.4f);
-    Material bleu(0, 0, 255, 0.5f);
+    Material rouge(255, 0, 0, 0.5f);
+    Material bleu(0, 0, 255, 0.4f);
     Material vert(0, 255, 0, 0.0f);
     Material jaune(255, 255, 0, 0.0f);
 
     // Création des shapes
-    Cube* c = new Cube(Vector3f(0.1f, 0.0f, 1.0f), w, h, bleu);
+    Cube* c = new Cube(Vector3f(0.1f, 0.0f, 0.0f), w, h, bleu);
     Sphere* s = new Sphere(Vector3f(-0.8f, 0.0f, 0.3f), 0.5f, rouge);
     Quad* q = new Quad(Vector3f(0.6f, -0.1f, 0.3f), Vector3f(0.1f, 0.2f, 0.1f), Vector3f(0.4f, 0.1f, 0.1f), jaune);
 
@@ -400,7 +401,7 @@ void Scene::render(int x_taille, int y_taille, std::string fichier)
 
     camera_ = Camera(Vector3f(0.4, -0.5f, -5.0f),Vector3f(0, 0,1)); // la caméra est devant la partie ouverte de la boite et regarde droit devant
 
-    source_ = Ray3f(Vector3f(0.4, -1.0f, -2.0f), Vector3f(0, 1, 0)); // la source est à la position
+    source_ = Ray3f(Vector3f(0.4, -0.9f, -2.0f), Vector3f(0, 1, 0)); // la source est à la position
 
     bool running = true;
     bool image_finale = false;

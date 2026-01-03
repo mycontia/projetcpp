@@ -2,3 +2,6 @@ mon_app
 mon_app.dSYM
 *.o
 a.out
+prog
+scene.bmp
+.DS_Store
