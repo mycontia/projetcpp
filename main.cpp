@@ -1,31 +1,26 @@
 /** * @file main.cpp
  * @brief affiche l'image
  * @details Initialise SDL, crée de la scène (objets, caméra, lumière)
- * calcul d'ombres 
-
-
-
-*/
+ * calcul d'ombres
+ */
 
 // Bibliothèque
-#include <stdio.h>
-#include <stdbool.h>
-#include <iostream>
 #include "rayon.h"
-
-
+#include <iostream>
+#include <stdbool.h>
+#include <stdio.h>
 
 /** * @brief fonction main
- * @return 0 si succès 
-*/
+ * @return 0 si succès
+ */
 
+int main(void)
+{
 
-int main(void) {
-    
-    //taille de l'écran
+    // taille de l'écran
     int y_taille = 640;
     int x_taille = y_taille;
-    std::string fichier = "scene.bmp" ;
+    std::string fichier = "scene.bmp";
 
     Scene scene;
     scene.render(x_taille, y_taille, fichier);
