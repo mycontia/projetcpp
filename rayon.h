@@ -2,7 +2,6 @@
 #define RAYON_H
 #include <cmath>
 #include <iostream>
-// ajout d'un include
 #include <SDL2/SDL.h>
 #include <vector>
 
@@ -92,7 +91,7 @@ class Vector3f
     /**
      * @brief renvoie un vecteur de norme 1.
      */
-    Vector3f normalise() const ///< const car on ne veut pas modifier le vecteur
+    Vector3f normalise() const ///< const car on ne veut pas modifier l'objet courant 
     {
         float n = norme();
         Vector3f v = Vector3f(0, 0, 0);
@@ -113,9 +112,9 @@ class Vector3f
  */
 struct answer
 {
-    bool hit;          ///<  vrai si le rayon intersecte une shape
-    Vector3f pt_inter; ///< coordonnées du point d'intersection
-    Vector3f norm;     ///< normale à la surface
+    bool hit; ///<  vrai si le rayon intersecte une shape
+    Vector3f pt_inter; ///< coordonnées du point d'intersection s'il existe, (0,0,0) sinon
+    Vector3f norm; ///< normale à la surface, (0,0,0) sinon
 };
 
 //  Prototypes des fonctions outils
@@ -199,13 +198,13 @@ class Camera
 class Material
 {
   public:
-    float r_; ///<  red.
-    float g_; ///<  green.
-    float b_; ///<  blue.
+    float r_; ///<  rouge
+    float g_; ///<  vert
+    float b_; ///<  bleu
     float shininess_; ///<   coefficient de luminosité entre 0 (pas de réflection (objet mat)) et 1 (rayon entièrement réfléchi (miroir)).
 
     /**
-     * @brief Indique si deux vecteurs ont les mêmes coordonnées.
+     * @return le mélange de couleurs en prenant en compte le phénomène de réflexion.
      */
     Material couleur(Material reflet);
 
@@ -394,12 +393,7 @@ class Scene
     void render(int x_taille, int y_taille, std::string fichier);
 };
 
-// Fonctions de rendu globales
-/**
- * @brief
- * @return
- */
-void draw_color(SDL_Renderer* rend, Material col, float intens);
+
 
 class Sdl {
 public:
@@ -412,8 +406,12 @@ public:
 
     /**
      * @brief crée une fenêtre de la bonne taille
+     * @param x La longueur de la fenêtre.
+     * @param y La hauteur de la fenêtre.
      */
-    Sdl(int x, int y) : x_taille(x), y_taille(y) {
+    Sdl(int x, int y) {
+        x_taille =x;
+        y_taille=y;
         init(); 
         // le premier argument est le nom de lafenetre , 
         // on a SDL_WINDOWPOS_CENTERED 2 fois pour dire la position de x et de y c'est à dire la position de la fenêtre, 
@@ -434,31 +432,31 @@ public:
     }
 
     /**
-     * @brief on initialise la SDL
+     * @brief Initialise la SDL.
      */
     void init() { SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER); }
     
     /**
-     * @brief on choisit les couleurs à mettre sur le renderer
+     * @brief On choisit les couleurs à mettre sur le renderer.
      */
     void drawcolor(int r, int g, int b, int a) { 
         SDL_SetRenderDrawColor(renderer, r, g, b, a); 
     }
     /**
-     * @brief on choisit le point où le renderer va agir
+     * @brief On choisit le point où le renderer va agir.
      */
     void drawpoint(int x, int y) { 
         SDL_RenderDrawPoint(renderer, x, y); 
     }
 
     /**
-     * @brief on affiche ce qu'on a "dessiné"
+     * @brief Affiche ce qui a été dessiné.
      */
     void present() { SDL_RenderPresent(renderer); }
     
 
     /**
-     * @brief on efface ce qu'on a dessiné
+     * @brief Efface ce qui a été dessiné
      */
     void clear() {
         drawcolor(0, 0, 0, 255);

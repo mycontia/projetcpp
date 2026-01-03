@@ -396,7 +396,7 @@ void Scene::render(int x_taille, int y_taille, std::string fichier)
     camera_ = Camera(Vector3f(0.4, -0.5f, -5.0f),Vector3f(0, 0,1)); // la caméra est devant la partie ouverte de la boite et regarde droit devant
 
     
-    source_ = Ray3f(Vector3f(0, -0.9f, -1.0f), Vector3f(0, 1, 0)); // la source est à la position
+    source_ = Ray3f(Vector3f(0, -0.95f, -1.0f), Vector3f(0, 1, 0)); // la source est sur la face du haut de la boite 
 
 
     bool running = true;
@@ -404,10 +404,10 @@ void Scene::render(int x_taille, int y_taille, std::string fichier)
     while (running)
     {
         SDL_Event e;
-        // tant qu'il y a un evenement dans la fenetre sdl
+        // tant qu'il y a un évenement dans la fenetre sdl
         while (SDL_PollEvent(&e) != 0)
         {
-            // si jamais il se passe un évènement de type quit comme cliquer sur la croix , la fenetre se ferme
+            // si jamais il se passe un évènement de type quit comme cliquer sur la croix, la fenetre se ferme
             if (e.type == SDL_QUIT)
                 running = false;
 
@@ -480,11 +480,11 @@ void Scene::render(int x_taille, int y_taille, std::string fichier)
                     Material c = recursive(ray_init, 0);
                     ecran.drawcolor(c.r_, c.g_, c.b_, 1);
 
-                    // je veux que le pinceau se pose en x y
+                    // on veut que le pinceau se pose en (x,y)
                     ecran.drawpoint(x, y);
                 }
             }
-            // montrer le dessin ( il était caché pour les calculs)
+            // montrer le dessin (il était caché pour les calculs)
             sauvegarder_image(ecran.renderer, x_taille, y_taille, fichier);
             ecran.present();
             image_finale = true;
