@@ -401,52 +401,66 @@ class Scene
  */
 void draw_color(SDL_Renderer* rend, Material col, float intens);
 
-class Sdl
-{
-  public:
+class Sdl {
+public:
+    
+    //les paramètres pour la SDL
     SDL_Window* window;
-    SDL_Renderer* renderer; // Public comme demandé
+    SDL_Renderer* renderer; 
     int x_taille;
     int y_taille;
 
-    Sdl(int x, int y) : x_taille(x), y_taille(y)
-    {
-        init(); // Appelle ton init perso
-        window = SDL_CreateWindow("Ray Tracing MVP0.1", SDL_WINDOWPOS_CENTERED,
-                                  SDL_WINDOWPOS_CENTERED, x_taille, y_taille, 0);
+    /**
+     * @brief crée une fenêtre de la bonne taille
+     */
+    Sdl(int x, int y) : x_taille(x), y_taille(y) {
+        init(); 
+        // le premier argument est le nom de lafenetre , 
+        // on a SDL_WINDOWPOS_CENTERED 2 fois pour dire la position de x et de y c'est à dire la position de la fenêtre, 
+        //on a 2 arguments pour la taille de la fenêtre , et enfin 0 pour dire qu'il y a 0 options supplémentaires
+        window = SDL_CreateWindow("Ray Tracing MVP0.1", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, x_taille, y_taille, 0);
+        // Création du renderer pour pouvoir dessiner des points
+        // le renderer est comme un pinceau c'est un outil pour dessiner des points
         renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     }
 
-    ~Sdl()
-    {
+    /**
+     * @brief Destructeur, on libère la mémoire
+     */
+    ~Sdl() {
         SDL_DestroyRenderer(renderer);
         SDL_DestroyWindow(window);
         SDL_Quit();
     }
 
-    // Tes fonctions simplifiées
-    void init()
-    {
-        SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER);
+    /**
+     * @brief on initialise la SDL
+     */
+    void init() { SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER); }
+    
+    /**
+     * @brief on choisit les couleurs à mettre sur le renderer
+     */
+    void drawcolor(int r, int g, int b, int a) { 
+        SDL_SetRenderDrawColor(renderer, r, g, b, a); 
+    }
+    /**
+     * @brief on choisit le point où le renderer va agir
+     */
+    void drawpoint(int x, int y) { 
+        SDL_RenderDrawPoint(renderer, x, y); 
     }
 
-    void drawcolor(int r, int g, int b, int a)
-    {
-        SDL_SetRenderDrawColor(renderer, r, g, b, a);
-    }
+    /**
+     * @brief on affiche ce qu'on a "dessiné"
+     */
+    void present() { SDL_RenderPresent(renderer); }
+    
 
-    void drawpoint(int x, int y)
-    {
-        SDL_RenderDrawPoint(renderer, x, y);
-    }
-
-    void present()
-    {
-        SDL_RenderPresent(renderer);
-    }
-
-    void clear()
-    {
+    /**
+     * @brief on efface ce qu'on a dessiné
+     */
+    void clear() {
         drawcolor(0, 0, 0, 255);
         SDL_RenderClear(renderer);
     }

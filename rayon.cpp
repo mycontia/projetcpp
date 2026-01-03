@@ -338,7 +338,7 @@ void sauvegarder_image(SDL_Renderer* rend, int x, int y, std::string fichier)
     }
 
     // on lit les pixels du GPU vers notre surface
-    // attention au format ARGB8888 souvent utilisé par SDL2
+    // le format ARGB8888 est souvent utilisé par SDL2
     SDL_RenderReadPixels(rend, NULL, SDL_PIXELFORMAT_ARGB8888, surface->pixels, surface->pitch);
 
     // écriture du fichier (on met .bmp car c'est natif a SDL)
@@ -356,13 +356,7 @@ void sauvegarder_image(SDL_Renderer* rend, int x, int y, std::string fichier)
 
 void Scene::render(int x_taille, int y_taille, std::string fichier)
 {
-    // fenetre , SDL_WINDOWPOS_CENTERED 2 fois pour dire la position x et y où je veux que ma
-    // fenêtre soit, taille de la fenêtre large puis haut, et 0 pour 0 options supplémentaires
-    // Création du renderer pour pouvoir dessiner des points
-    // renderer = pinceau , -1 c'est un truc par défaut, c'est une sorte d'outil utilisé pour
-    // dessiner,
-    // genre pinceau ou crayon, et SDL_RENDERER_ACCELERATED c'est pour utiliser le GPU au lieu du
-    // CPU en fait c'est pour aller plus vite
+    
     Sdl ecran(x_taille, y_taille);
 
     Vector3f h = Vector3f(-0.15, 0.5, 0.5f);
@@ -401,7 +395,9 @@ void Scene::render(int x_taille, int y_taille, std::string fichier)
 
     camera_ = Camera(Vector3f(0.4, -0.5f, -5.0f),Vector3f(0, 0,1)); // la caméra est devant la partie ouverte de la boite et regarde droit devant
 
-    source_ = Ray3f(Vector3f(0.4, -0.9f, -2.0f), Vector3f(0, 1, 0)); // la source est à la position
+    
+    source_ = Ray3f(Vector3f(0, -0.9f, -1.0f), Vector3f(0, 1, 0)); // la source est à la position
+
 
     bool running = true;
     bool image_finale = false;
@@ -411,7 +407,7 @@ void Scene::render(int x_taille, int y_taille, std::string fichier)
         // tant qu'il y a un evenement dans la fenetre sdl
         while (SDL_PollEvent(&e) != 0)
         {
-            // si jamais il se passe un truc de type quit c est à dire la croix et bien on quitte
+            // si jamais il se passe un évènement de type quit comme cliquer sur la croix , la fenetre se ferme
             if (e.type == SDL_QUIT)
                 running = false;
 
@@ -439,7 +435,7 @@ void Scene::render(int x_taille, int y_taille, std::string fichier)
                     source_.origin_.z_ -= vitesse;
                     break; // Vers nous (Z diminue)
 
-                // Conservation des flèches pour la CAMÉRA
+                // mouvement des flèches pour la CAMÉRA
                 case SDLK_UP:
                     camera_.position_.y_ += vitesse;
                     break;
@@ -475,10 +471,6 @@ void Scene::render(int x_taille, int y_taille, std::string fichier)
                     ecran.drawcolor(0, 0, 0, 255);
 
                     /*
-                    Pour faire l'ombre on applique la même logique que lorsque l'on affiche un point sur l'écran.
-                    Avant de colorier un point sur l'écran on veut vérifier si celui-ci n'est pas à l'ombre.
-                    Pour cela on regarde le rayon de la source vers ce point et on voit s'il intersecte un autre point que ce point.
-                    Si c'est le cas ce point est à l'ombre.
                     Formule expliquée dans le rapport.
                     */
 
@@ -499,7 +491,7 @@ void Scene::render(int x_taille, int y_taille, std::string fichier)
             SDL_Delay(10);
         }
     }
-
+    //libérer la mémoire
     for (size_t i = 0; i < shapes_.size(); ++i)
     {
         delete shapes_[i];
