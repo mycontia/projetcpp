@@ -1,3 +1,8 @@
+à mettre dans le compilateur : 
+
+g++ -g -Wall -Wextra -o prog *.cpp $(pkg-config --cflags --libs sdl2)
+
+
 readme
 Pour installer la bibliothèque sdl je crois qu'il faut faire ainsi : 
 
