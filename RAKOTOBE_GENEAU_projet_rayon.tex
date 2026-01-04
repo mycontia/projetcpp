@@ -1,0 +1,475 @@
+\documentclass[12pt, a4paper]{article}
+
+% --- Préambule ---
+\usepackage[T1]{fontenc} 
+\usepackage[french]{babel}
+\usepackage{amsmath, amssymb}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{arrows}
+\usepackage{float}
+
+\title{Lancer de rayon}
+\author{Laura GENEAU, Safidy RAKOTOBE}
+\date{4 janvier 2026}
+
+% --- Corps du document ---
+\begin{document}
+
+% 1. La page de garde
+\maketitle 
+\newpage 
+
+% 2. Le sommaire
+\tableofcontents 
+\newpage 
+
+% 3. Le contenu
+\section{Contexte}
+La synthèse d'images 3D repose principalement sur deux approches : la rasterisation et le lancer de rayon. Contrairement à la rasterisation qui projette des objets sur un plan, le lancer de rayon simule le trajet inverse de la lumière en suivant des rayons partant de l'œil du spectateur à travers chaque pixel de l'écran. 
+
+Ce projet vise à implémenter un algorithme de base permettant de calculer l'intersection de ces rayons avec des objets géométriques (sphères, cubes, quadrilatères) et de gérer les phénomènes d'illumination, d'ombre portée et de réflexion. La scène finale consiste en une boîte composée de cinq quadrilatères, contenant divers volumes et une source de lumière, offrant ainsi un rendu réaliste par simulation physique des rebonds lumineux.
+
+\section{Mise en scène}
+Nous avons une caméra orientée vers la face ouverte d'une boite verte mate. Sur la face du haut de celle-ci, est disposée une source de lumière. Dans cette boite nous avons ajouté une sphère rouge réfléchissante, un cube bleu réfléchissant et enfin un quad jaune mat.   
+\section{Concepts physiques et mathématiques}
+\subsection{Intersection d'un rayon et d'une shape}
+\subsubsection{Intersection d'un rayon et d'une sphère}
+Le calcul d'intersection repose sur la résolution d'un système à deux équations : 
+
+\begin{itemize}
+    \item \textbf{Le Rayon :} Un point $P$ appartenant au rayon est défini par :
+    \[ P = P_0 + t\vec{d} \]
+    Où :
+    \begin{itemize}
+        \item $P_0$ est l'origine du rayon (\texttt{Vector3f}).
+        \item $\vec{d}$ est la direction du rayon (\texttt{Vector3f}).
+        \item $t$ est la distance parcourue depuis l'origine (\texttt{float}), avec $t > 0$.
+    \end{itemize}
+
+    \bigskip % Saut de ligne entre les deux définitions
+
+    \item \textbf{La sphère :} Un point $P$ appartient à la sphère si :
+    \[ \Vert P - C \Vert^2 = R^2 \]
+    Où :
+    \begin{itemize}
+        \item $C$ est le centre de la sphère (\texttt{Vector3f}).
+        \item $R$ est le rayon de la sphère (\texttt{float}).
+    \end{itemize}
+\end{itemize}
+
+\medskip
+
+En substituant l'équation du rayon dans celle de la sphère, on obtient une équation du second degré : $at^2 + bt + c = 0$, où :
+\begin{itemize}
+    \item $a = \vec{d} \cdot \vec{d}$
+    \item $b = 2 \vec{d} \cdot (P_0 - C)$
+    \item $c = (P_0 \cdot P_0) + (C \cdot C) - 2(C \cdot P_0) - R^2$
+\end{itemize}
+
+\bigskip
+
+\textbf{Interprétation du discriminant $\Delta = b^2 - 4ac$ :}
+\begin{itemize}
+    \item[$\rightarrow$] \textbf{Si $\Delta < 0$ :} Aucune intersection réelle : le rayon ne touche pas la sphère.
+    \item[$\rightarrow$] \textbf{Si $\Delta = 0$ :} Le rayon est tangent à la sphère : une seule intersection.
+    \item[$\rightarrow$] \textbf{Si $\Delta > 0$ :} Le rayon traverse la sphère : deux points d'intersection. On choisit le point d'intersection le plus proche de la caméra.
+\end{itemize}
+\subsubsection{Intersection d'un rayon et d'un plan infini}
+De même que pour la sphère, on a deux équations : 
+
+\begin{itemize}
+    \item \textbf{Le Rayon :} Un point $P$ situé sur le rayon est défini par :
+    \[ P = P_0 + t\vec{d} \]
+
+    %\end{itemize}
+
+    \medskip % Un peu d'espace entre les deux blocs
+
+    \item \textbf{Le Plan :} Un point $P$ appartient au plan si le vecteur allant du centre de la surface vers $P$ est perpendiculaire à la normale :
+    \[ (P - \text{origine}) \cdot \vec{N} = 0 \]
+    Où :
+    \begin{itemize}
+        \item \textit{origine} est le centre de la surface (\texttt{Vector3f}).
+        \item $\vec{N}$ est le vecteur normal à la surface (\texttt{Vector3f}).
+    \end{itemize}
+\end{itemize}
+
+\bigskip
+
+En substituant l'équation du rayon dans celle du plan, on cherche la valeur de $t$ telle que :
+\[ (P_0 + t\vec{d} - \text{origine}) \cdot \vec{N} = 0 \]
+
+En développant, on obtient la distance d'intersection $t$ :
+\[ t = \frac{(\text{origine} - P_0) \cdot \vec{N}}{\vec{d} \cdot \vec{N}} \]
+
+\textbf{Remarque :} Si le dénominateur $\vec{d} \cdot \vec{N} = 0$, cela signifie que le rayon est parallèle au plan et qu'il n'y a pas d'intersection.
+
+
+
+\subsection{Réflexion d'un rayon sur une surface}
+
+\begin{figure}[H] % [h!] force l'image à se placer ici dans le texte
+    \centering % Pour centrer l'image
+    \includegraphics[width=0.7\textwidth]{réflexion.jpg} 
+    \caption{Réflexion d'un rayon sur une surface avec un coefficient de réflexion (shininess) non nul}
+    \label{fig:mon_image} % Sert à faire des références plus tard
+\end{figure}
+
+\textbf{Légende du schéma :} % On place le titre AVANT le begin{itemize}
+\smallskip
+\begin{itemize}
+    \item $S$ : Surface d'impact
+    \item $\vec{I}$ : Rayon incident
+    \item $\vec{I}_{\perp}$ : Composante perpendiculaire du rayon incident
+    \item $\vec{I}_{\parallel}$ : Composante parallèle du rayon incident
+    \item $\vec{R}$ : Rayon réfléchi
+    \item $\vec{N}$ : Vecteur normal à la surface
+    \medskip
+
+
+\textbf{Calculs :}
+\smallskip
+
+
+    \[ \vec{I} = \vec{I}_{\perp} + \vec{I}_{\parallel} \]
+    
+    \begin{align*}
+        \vec{R} &= \vec{I}_{\parallel} - \vec{I}_{\perp} \\
+        &= \vec{I} - 2(\vec{I} \cdot \vec{N})\vec{N} \\
+        &= \vec{I}_{\perp} + \vec{I}_{\parallel} - 2\vec{I}_{\perp} \\
+        &= \vec{I} - 2\vec{I}_{\perp} \\
+        &= \vec{I} - 2(\vec{I} \cdot \vec{N})\vec{N} \quad \text{car } \vec{I} \cdot \vec{N} \leq 0
+    \end{align*}
+
+
+\subsection{Calcul des ombres portées}
+
+Pour déterminer si un point d'impact $P$ est situé dans l'ombre, on génère un \textbf{rayon d'ombre} (shadow ray) partant de $P$ en direction de la source de lumière $L$.
+
+\begin{itemize}
+    \item \textbf{Direction du rayon :} $\vec{d}_{ombre} = \frac{L - P}{\Vert L - P \Vert}$
+    \item \textbf{Origine corrigée :} Pour éviter l'auto-intersection due aux erreurs de précision flottante, on décale l'origine : $P_{start} = P + \epsilon \vec{N}$ (où $\epsilon$ est une valeur très petite).
+\end{itemize}
+
+Un point est considéré comme \textbf{à l'ombre} si une intersection est détectée avec un objet de la scène à une distance $d_{obstacle -> Lumiere}$ telle que :
+\[ 0 < d_{obstacle -> Lumiere} < d_{P -> Lumiere} \]
+
+
+
+Si un obstacle est trouvé dans cet intervalle, l'intensité lumineuse du pixel est réduite à la valeur de la lumière ambiante. Dans le cas contraire, on applique le modèle d'illumination classique (produit scalaire entre la normale et le vecteur lumière).
+
+% \section{Conception Logicielle : Diagramme UML}
+
+% \begin{center}
+% \resizebox{\textwidth}{!}{
+% \begin{tikzpicture}[
+%     node distance=2.5cm,
+%     class/.style={draw, rectangle, minimum width=3.2cm, minimum height=1.2cm, align=left, fill=gray!10, font=\small},
+%     inheritance/.style={->, >=open triangle 60, thick},
+%     aggregation/.style={- {diamond}, thick}
+% ]
+
+% % --- Ligne du haut (Classes de données et utilitaires) ---
+% \node[class] (Camera) at (-7, 8) {
+%     \textbf{Camera} \\
+%     + position : Vector3f \\
+%     + direction : Vector3f
+% };
+
+% \node[class] (Vector) at (-2.5, 8) {
+%     \textbf{Vector3f} \\
+%     + x, y, z : float \\
+%     + normalise()
+% };
+
+% \node[class] (Ray) at (1.5, 8) {
+%     \textbf{Ray3f} \\
+%     + origin : Vector3f \\
+%     + direction : Vector3f
+% };
+
+% \node[class] (Answer) at (5.5, 8) {
+%     \textbf{<<struct>> answer} \\
+%     + hit : bool \\
+%     + pt\_inter : Vector3f \\
+%     + norm : Vector3f
+% };
+
+% % --- Milieu (Cœur du moteur) ---
+% \node[class] (Scene) at (-7, 4.5) {
+%     \textbf{Scene} \\
+%     + camera : Camera \\
+%     + source : Ray3f \\
+%     + shapes : vector<Shape*> \\
+%     + intensite(a) : float
+% };
+
+% \node[class] (Shape) at (-1.5, 4.5) {
+%     \textbf{Shape} (Abstract) \\
+%     + matter : Material \\
+%     \textit{+ is\_hit(ray) : answer} \\
+%     + reflect(r, a) : Ray3f
+% };
+
+% \node[class] (Material) at (4, 4.5) {
+%     \textbf{Material} \\
+%     + r, g, b : float \\
+%     + shininess : float
+% };
+
+% % --- Bas (Géométrie) ---
+% \node[class] (Sphere) at (-6, 0.5) {
+%     \textbf{Sphere} \\
+%     + origin : Vector3f \\
+%     + radius : float \\
+%     + is\_hit() : answer
+% };
+
+% \node[class] (Quad) at (-1.5, 0.5) {
+%     \textbf{Quad} \\
+%     + origin, width, \\
+%     height : Vector3f \\
+%     + is\_hit() : answer
+% };
+
+% \node[class] (Cube) at (3, 0.5) {
+%     \textbf{Cube} \\
+%     + origin, height, \\
+%     width : Vector3f \\
+%     + is\_hit() : answer
+% };
+
+% % --- Relations ---
+% \draw[inheritance] (Sphere.north) -- ++(0,1.2) -| (Shape.south);
+% \draw[inheritance] (Quad.north) -- (Shape.south);
+% \draw[inheritance] (Cube.north) -- ++(0,1.2) -| (Shape.south);
+
+% \draw[->, thick] (Scene.north) -- (Camera.south) node[midway, left] {1};
+% \draw[->, thick] (Scene.east) -- (Shape.west) node[midway, above] {1..*};
+% \draw[aggregation] (Shape.east) -- (Material.west);
+
+% \end{tikzpicture}
+% }
+% \end{center}
+
+
+\section{Conception Logicielle : Diagramme UML}
+
+\begin{center}
+\resizebox{\textwidth}{!}{
+\begin{tikzpicture}[
+    node distance=3cm,
+    class/.style={draw, rectangle, minimum width=3.8cm, minimum height=1.5cm, align=left, fill=gray!10, font=\small},
+    inheritance/.style={->, >=open triangle 60, thick},
+    aggregation/.style={- {open diamond}, thick},
+    dependency/.style={->, dashed, >=stealth, thick}
+]
+
+% --- NIVEAU 1 : Utilitaires et Structures (Haut) ---
+\node[class] (Vector) at (-6, 10) {
+    \textbf{Vector3f} \\
+    + x\_, y\_, z\_ : float \\
+    + operator+ , - , * \\
+    + norme() : float \\
+    + normalise() : Vector3f
+};
+
+\node[class] (Ray) at (-1.5, 10) {
+    \textbf{Ray3f} \\
+    + origin\_ : Vector3f \\
+    + direction\_ : Vector3f
+};
+
+\node[class] (Camera) at (3, 10) {
+    \textbf{Camera} \\
+    + position\_ : Vector3f \\
+    + direction\_ : Vector3f
+};
+
+\node[class] (Answer) at (7.5, 10) {
+    \textbf{<<struct>> answer} \\
+    + hit : bool \\
+    + pt\_inter : Vector3f \\
+    + norm : Vector3f
+};
+
+% --- NIVEAU 2 : Gestion de l'affichage et Scène (Milieu Haut) ---
+\node[class] (Sdl) at (1, 6.2) {
+    \textbf{Sdl} \\
+    + window : SDL\_Window* \\
+    + renderer : SDL\_Renderer* \\
+    + x\_taille, y\_taille : int \\
+
+    + Sdl(x, y) \\
+    + init() : void \\
+    + drawcolor(r, g, b, a) : void \\
+    + drawpoint(x, y) : void \\
+    + present() : void \\
+    + clear() : void
+};
+
+\node[class] (Scene) at (-8, 6) {
+    \textbf{Scene} \\
+    + camera\_ : Camera \\
+    + shapes\_ : vector<Shape*> \\
+    + source\_ : Ray3f \\
+
+    + box(centre, w, h, d, m) : void \\
+    + intensite(a : const answer\&) : float \\
+    + render(w, h, fichier) : void\\
+    + recursive(Ray3f ray, int count) : Material
+};
+
+% --- NIVEAU 3 : Abstraction et Matériaux (Milieu Bas) ---
+\node[class] (Shape) at (0, 2.5) {
+    \textbf{Shape} (Abstract) \\
+    + matter\_ : Material \\
+    \textit{+ is\_hit(ray : Ray3f) : answer} \\
+    + reflect(r : Ray3f, a : const answer\&) : Ray3f
+};
+
+\node[class] (Material) at (8, 2.5) {
+    \textbf{Material} \\
+    + r\_, g\_, b\_ : float \\
+    + shininess\_ : float \\
+    + couleur(reflet : Material) : Material
+};
+
+% --- NIVEAU 4 : Géométries concrètes (Bas) ---
+\node[class] (Sphere) at (-7, -1.5) {
+    \textbf{Sphere} \\
+    + origin\_ : Vector3f \\
+    + radius\_ : float \\
+    + is\_hit(ray : Ray3f) : answer
+};
+
+\node[class] (Quad) at (0, -1.5) {
+    \textbf{Quad} \\
+    + origin\_, width\_, height\_ : Vector3f \\
+
+    + is\_hit(ray : Ray3f) : answer \\
+    + est\_dans\_surf(v : Vector3f) : bool
+};
+
+\node[class] (Cube) at (7, -1.5) {
+    \textbf{Cube} \\
+    + origin\_, height\_, width\_ : Vector3f \\
+
+    + is\_hit(ray : Ray3f) : answer
+};
+
+% --- RELATIONS ---
+
+% Héritage (avec coudes propres)
+\draw[inheritance] (Sphere.north) -- ++(0,1) -| (Shape.south);
+
+\draw[inheritance] (Cube.north) -- ++(0,1) -| (Shape.south);
+
+\draw[inheritance] (Quad.north) -- (Shape.south);
+
+% Agrégation et Liens
+\draw[aggregation] (Shape.east) -- (Material.west);
+\draw[aggregation] (Scene.south) -- (Shape.west);
+
+\end{tikzpicture}
+}
+\end{center}
+
+
+
+\textit{Note : Les fonctions globales suivantes complètent le système : \\
+- \texttt{draw\_color(SDL\_Renderer*, Material, float)} : Application de la couleur avec intensité. \\
+- \texttt{sauvegarder\_image(SDL\_Renderer*, int, int, string)} : Capture BMP de l'écran. \\
+- \texttt{prod\_scal(v1,v2)} et \texttt{prod\_vect(v1,v2)} : Opérations mathématiques sur les vecteurs. \\
+- \texttt{egal(Vector3f v1, Vector3f v2)} : Test d'égalité sur des vecteurs; \\
+- \texttt{max(float a, float b)} : Maximum entre deux nombres flottants. \\}
+
+
+\section{Explication des méthodes et fonctions}
+Présentes dans le fichier Doxyfile.
+
+\section{Nos choix}
+
+La méthode \texttt{is\_hit} ne renvoie pas seulement un booléen indiquant si oui ou non il y a eu intersection entre un rayon et une shape, mais également :
+\begin{itemize}
+    \item Les coordonnées du point d'intersection lorsqu'il est présent. (un vecteur nul est renvoyé s'il n'y a pas d'intersection).
+    \item La normale à la surface au point d'intersection le plus proche de la caméra (un vecteur nul est renvoyé s'il n'y a pas d'intersection).
+\end{itemize}
+En effet, pour savoir s'il y a intersection entre la \texttt{shape} et le rayon, nous avons dû calculer ce point et vérifier s'il était contenu dans les contraintes spatiales de la forme. Ce type de retour, structuré via le type \texttt{answer}, nous a permis de ne pas avoir la méthode \texttt{reflect} virtuelle dans la classe \texttt{shape}. Ainsi, nous n'avons pas eu à coder trois méthodes différentes pour le cube, le quad et la sphère, mais bien une seule et même méthode commune à toutes les shapes.
+
+\bigskip
+
+Les arguments de type simple tels que \texttt{Ray} ou \texttt{Vector3f} ont été passés par valeur. Les arguments de type \texttt{answer} ont quant à eux été passés par référence car il s'agit d'une structure plus grosse qu'un simple \texttt{Vector3f} dont on ne souhaite pas faire la copie pour ne pas encombrer la mémoire. 
+
+
+\bigskip
+Nous avons codé dans la méthode recursive à la fois le calcul de l'ombre et celui de la réflexion car toutes deux passent par la recherche de la plus proche shape intersectée. Alors que la réflexion s'appelle récursivement, ce n'est pas le cas pour l'ombre d'où la présence d'un compteur qui permet non seulement de ne pas appeler la fonction récursive un nombre infini de fois (dans le cas où deux miroirs se feraient face par exemple) mais aussi de rajouter une condition sur ce compteur afin que seule la partie sur la réflexion soit récursive et que celle sur l'ombre ne soit appelée qu'une fois pour chaque rayon. 
+
+\bigskip
+On aurait souhaité pouvoir initialiser par défaut la structure answer avec les valeurs correspondantes au cas où le rayon n'intersecte rien mais la version du C++ utilisé nous génère des warnings dans ce cas. Nous avons donc redéfini les valeurs de cette structure à chaque fois qu'il n'y avait pas d'intersection.
+
+\section{Problèmes rencontrés et leur solution}
+\subsection{Erreurs de calcul sur les flottants}
+Comme nous faisons des calculs sur les flottants, il y a des arrondis qui faussent légèrement les calculs et donc le rendu final. 
+\subsubsection{Pour la réflexion}
+Lorsque nous calculons le rayon réfléchi, il se peut qu'avec les erreurs de calculs engendrés par la manipulation de flottants, le point d'intersection entre le rayon et la shape, qui correspond au point d'origine du rayon réfléchi, se trouve à l'intérieur de cette même shape. Ce rayon, à l'intérieur de la shape repart donc vers l'extérieur de cette même shape avec un angle opposé au rayon incident. La shape étant fermée, la source de lumière n'éclaire pas l'intérieur de la shape qui est donc foncé d'où le fait que le rayon réfléchi soit foncé et d'où la présence de points noirs.  
+\begin{figure}[H] % [h!] force l'image à se placer ici dans le texte
+    \centering % Pour centrer l'image
+    \includegraphics[width=0.7\textwidth]{ref(pas_décalage).png} 
+    \caption{Réflexion d'un rayon sans décalage de l'origine du rayon réfléchi}
+    \label{fig:mon_image} % Sert à faire des références plus tard
+\end{figure}
+
+
+
+\begin{figure}[H] % [h!] force l'image à se placer ici dans le texte
+    \centering % Pour centrer l'image
+    \includegraphics[width=0.7\textwidth]{reflexio(décalage).png} 
+    \caption{Réflexion d'un rayon avec décalage de l'origine du rayon réfléchi}
+    \label{fig:mon_image} % Sert à faire des références plus tard
+\end{figure}
+
+
+\subsubsection{Pour l'ombre}
+De manière analogue à la réflexion, le calcul de l'ombre souffre des imprécisions des flottants. Lors du lancer du rayon vers la source lumineuse, si l'origine du rayon (le point d'intersection) n'est pas légèrement décalée le long de la normale, le rayon risque de s'auto-intersecter avec sa propre surface d'origine. L'algorithme détecte alors un obstacle entre le point et la lumière, ce qui crée des artefacts visuels appelés « shadow acne » (points noirs parasites) là où l'objet devrait être éclairé.
+
+\begin{figure}[H] % [h!] force l'image à se placer ici dans le texte
+    \centering % Pour centrer l'image
+    \includegraphics[width=0.7\textwidth]{decaler_rayon/rayon_non_dec.png} 
+    \caption{L'objet s'auto intersecte par endroit}
+    \label{fig:rnd} % Sert à faire des références plus tard
+\end{figure}
+
+\begin{figure}[H] % [h!] force l'image à se placer ici dans le texte
+    \centering % Pour centrer l'image
+    \includegraphics[width=0.7\textwidth]{decaler_rayon/rayon_decal.png} 
+    \caption{Rayon décalé donc plus d'auto-intersection}
+    \label{fig:rd} % Sert à faire des références plus tard
+\end{figure}
+
+
+\section{Améliorations entreprises}
+Nous avons souhaité pouvoir déplacer la source de lumière et la caméra avec les touches du clavier. La lumière étant initialisée pour être localisée vers le centre de la face haute de la boite et la caméra étant inilialisée pour être 
+
+\subsection{La lumière}
+
+\begin{itemize}
+    \item[$\rightarrow$] la touche \textbf{ z} :  pour monter la lumière.
+    \item[$\rightarrow$] la touche \textbf{ s} :  pour descendre la lumière.
+    \item[$\rightarrow$] la touche \textbf{ q} :  pour décaler la lumière à gauche.
+    \item[$\rightarrow$] la touche \textbf{ d} :  pour décaler la lumière à droite.
+    \item[$\rightarrow$] la touche \textbf{ e} :  pour éloigner la lumière de l'utilisateur (la décaler vers le fond de la boite).
+    \item[$\rightarrow$] la touche \textbf{ w} :  pour rapprocher la lumière de l'utilisateur.
+\end{itemize}
+ 
+\subsection{La caméra}
+
+\begin{itemize}
+    \item[$\rightarrow$] \textbf{la flèche du haut } :  pour monter la caméra.
+    \item[$\rightarrow$] \textbf{la flèche du haut } :  pour descendre la caméra.
+    \item[$\rightarrow$] \textbf{la flèche de droite} :  pour décaler la caméra vers la droite.
+    \item[$\rightarrow$] \textbf{la flèche de gauche } :  pour décaler la caméra vers la gauche.
+\end{itemize}
+
+\end{document}
